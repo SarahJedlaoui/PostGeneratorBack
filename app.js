@@ -5,7 +5,15 @@ const setupSwagger = require('./swagger');
 
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: [
+      "*",  
+      "http://localhost:3000",
+      "https://sophiaa-seven.vercel.app"
+    ],
+    credentials: true
+  }));
+  
 
 // ✅ Enable parsing of form fields for multipart/form-data
 app.use(express.urlencoded({ extended: true }));
