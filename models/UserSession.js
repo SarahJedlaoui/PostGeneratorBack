@@ -8,7 +8,8 @@ const userSessionSchema = new mongoose.Schema({
   toneSummary: { type: Object },
   topic: String,
   questions: [String], 
-  answers: [String]   
+  answers: [String],
+  generatedPost: { type: String },   
 });
 
 module.exports = mongoose.model("UserSession", userSessionSchema);

@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const fs = require("fs");
 const { extractToneFromInput } = require("../services/openaiService");
-const { extractQuestionsFromTopic } = require("../services/openaiService");
+const { extractQuestionsFromTopic, generatePostFromSession, runFactCheck } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
   try {
@@ -20,7 +20,7 @@ exports.createSession = async (req, res) => {
       fs.renameSync(req.file.path, `./temp/${fileName}`);
     }
 
-    const toneRaw  = await extractToneFromInput(styleNotes || fileName);
+    const toneRaw = await extractToneFromInput(styleNotes || fileName);
 
     // Try to parse it if it's in JSON format
     let toneSummary;
@@ -43,13 +43,14 @@ exports.createSession = async (req, res) => {
   }
 };
 
-
 exports.updateTopic = async (req, res) => {
   const { sessionId, topic } = req.body;
-  console.log('topic',topic)
+  console.log("topic", topic);
 
   if (!sessionId || !topic) {
-    return res.status(400).json({ message: "sessionId and topic are required" });
+    return res
+      .status(400)
+      .json({ message: "sessionId and topic are required" });
   }
 
   try {
@@ -79,7 +80,8 @@ exports.generateQuestions = async (req, res) => {
   if (!session) return res.status(404).json({ message: "Session not found" });
 
   const topic = session.topic;
-  if (!topic) return res.status(400).json({ message: "Session has no topic yet" });
+  if (!topic)
+    return res.status(400).json({ message: "Session has no topic yet" });
 
   const questions = await extractQuestionsFromTopic(topic);
 
@@ -99,7 +101,7 @@ exports.getSession = async (req, res) => {
     res.json({
       questions: session.questions,
       topic: session.topic,
-      toneSummary: session.toneSummary
+      toneSummary: session.toneSummary,
     });
   } catch (err) {
     console.error("Failed to fetch session:", err.message);
@@ -129,5 +131,43 @@ exports.saveAnswers = async (req, res) => {
   } catch (error) {
     console.error("Error saving answers:", error.message);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// POST /api/persona/generate
+exports.generatePost = async (req, res) => {
+  const { sessionId } = req.body;
+  if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
+
+  try {
+    const post = await generatePostFromSession(sessionId);
+    res.status(200).json({ post });
+  } catch (err) {
+    console.error("Error generating post:", err);
+    res.status(500).json({ message: err.message || "Error generating post" });
+  }
+};
+
+exports.factCheck = async (req, res) => {
+  const { sessionId } = req.body;
+  if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
+
+  try {
+    const session = await UserSession.findOne({ sessionId });
+    if (!session || !session.generatedPost) {
+      return res.status(404).json({ message: "No post found for this session" });
+    }
+
+    const { generatedPost } = session;
+    const { highlights, sources } = await runFactCheck(generatedPost);
+
+    return res.status(200).json({
+      post: generatedPost,
+      highlights,
+      sources,
+    });
+  } catch (err) {
+    console.error("Fact-check error:", err.message);
+    res.status(500).json({ message: "Failed to process fact-check" });
   }
 };

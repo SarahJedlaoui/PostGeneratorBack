@@ -1,4 +1,5 @@
 const OpenAI = require("openai");
+const UserSession = require("../models/UserSession");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -120,5 +121,115 @@ Respond with a JSON array like:
   }
 };
 
+const generatePostFromSession = async (sessionId) => {
+  const session = await UserSession.findOne({ sessionId });
+  if (!session) throw new Error("Session not found");
 
-module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic};
+  const { toneSummary, topic, answers, questions } = session;
+
+  const tone = toneSummary?.tone || "neutral";
+  const style = toneSummary?.style || "neutral";
+
+  const prompt = `
+You are an expert assistant that crafts high-quality social media posts for professionals.
+Your job is to write a short, authentic post (max 100 words) based on the topic and user input.
+
+Tone: ${tone}
+Style: ${style}
+Topic: ${topic}
+
+Here are the user's answers to some topic-related questions:
+${questions?.map((q, i) => `Q: ${q}\nA: ${answers?.[i] || ""}`).join("\n")}
+
+Your responsibilities:
+- Analyze the user’s responses.
+- If any information is inaccurate, clarify or correct it.
+- Back up your post with facts or common knowledge.
+- Keep it helpful, trustworthy, and user-aligned.
+- End the post with a reflective question or engagement hook.
+- No hashtags unless absolutely essential.
+
+Output just the final crafted post.
+  `;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You write social media posts that sound natural, insightful, and accurate. You verify user input before writing."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    max_tokens: 300,
+    temperature: 0.8
+  });
+
+  const postText = completion.choices[0].message.content.trim();
+
+  session.generatedPost = postText;
+  await session.save();
+
+  return postText;
+};
+
+const runFactCheck = async (postText) => {
+  const prompt = `
+You are an AI fact-checker.
+Analyze the following social media post and return a JSON object like this:
+{
+  "highlights": [
+    {
+      "claim": "Text being checked",
+      "verdict": "confirmed" | "partially confirmed" | "incorrect",
+      "explanation": "Short justification",
+      "source": {
+        "title": "Source name",
+        "url": "https://example.com"
+      }
+    },
+    ...
+  ],
+  "sources": [
+    {
+      "title": "Source name",
+      "snippet": "Short description",
+      "url": "https://example.com"
+    },
+    ...
+  ]
+}
+
+Post:
+"""${postText}"""
+`;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      { role: "system", content: "You return structured JSON only." },
+      { role: "user", content: prompt }
+    ],
+    temperature: 0.5,
+    max_tokens: 800
+  });
+
+  const raw = completion.choices[0].message.content.trim();
+
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      highlights: parsed.highlights || [],
+      sources: parsed.sources || [],
+    };
+  } catch (err) {
+    console.error("❌ Failed to parse AI response as JSON:", raw);
+    throw new Error("AI response was not valid JSON.");
+  }
+};
+
+module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic, generatePostFromSession, runFactCheck};
