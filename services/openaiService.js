@@ -232,4 +232,46 @@ Post:
   }
 };
 
-module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic, generatePostFromSession, runFactCheck};
+
+
+
+const extractQuestionsFromTopicV2 = async (topic,question) => {
+  const prompt = `
+You are a helpful AI assistant helping people write great, insightful social media posts.
+
+Generate 3–4 deep, engaging, and reflective questions that someone could answer if they want to share their thoughts, experience, or opinion about the topic: "${topic}" specifically to understand this question : "${question}".
+
+The user could be a developer, doctor, designer, or any knowledge professional. Make the questions inclusive, 
+interesting, personal, and specific to the topic.
+
+Respond with a JSON array like:
+[
+  "What drew you to this topic originally?",
+  "How has your perspective on this topic evolved?",
+  "What common misconceptions do you see around it?",
+  "What advice or lessons would you share with others?"
+]
+`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.5
+    });
+
+    const content = response.choices[0].message.content;
+
+    return JSON.parse(content);
+  } catch (err) {
+    console.error("Question generation failed:", err.message);
+    return [
+      "What inspired you to talk about this topic?",
+      "What’s one thing people misunderstand about it?",
+      "How do you personally relate to this topic?",
+      "What experience shaped your views on it?"
+    ];
+  }
+};
+
+module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic, generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2};

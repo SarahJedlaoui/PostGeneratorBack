@@ -227,7 +227,7 @@ router.post("/fact-check", controller.factCheck);
 
 
 
-
+router.post("/questionsV2", controller.generateQuestions2);
 
 router.put("/question", controller.updateQuestion);
 

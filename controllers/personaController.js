@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const fs = require("fs");
 const { extractToneFromInput } = require("../services/openaiService");
-const { extractQuestionsFromTopic, generatePostFromSession, runFactCheck } = require("../services/openaiService");
+const { extractQuestionsFromTopic, generatePostFromSession, runFactCheck,extractQuestionsFromTopicV2 } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
   try {
@@ -119,6 +119,9 @@ exports.generateQuestions = async (req, res) => {
   res.status(200).json({ questions });
 };
 
+
+
+
 exports.getSession = async (req, res) => {
   const { sessionId } = req.params;
 
@@ -198,4 +201,27 @@ exports.factCheck = async (req, res) => {
     console.error("Fact-check error:", err.message);
     res.status(500).json({ message: "Failed to process fact-check" });
   }
+};
+
+
+
+exports.generateQuestions2 = async (req, res) => {
+  const { sessionId } = req.body;
+
+  if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
+
+  const session = await UserSession.findOne({ sessionId });
+  if (!session) return res.status(404).json({ message: "Session not found" });
+
+  const topic = session.topic;
+  const question = session.chosenQuestion;
+  if (!topic)
+    return res.status(400).json({ message: "Session has no topic yet" });
+
+  const questions = await extractQuestionsFromTopicV2(topic,question);
+
+  session.questions = questions;
+  await session.save();
+
+  res.status(200).json({ questions });
 };
