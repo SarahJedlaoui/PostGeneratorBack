@@ -274,4 +274,100 @@ Respond with a JSON array like:
   }
 };
 
-module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic, generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2};
+const generateQuickTake = async (question) => {
+  const prompt = `
+You are a helpful AI assistant that provides short, insightful context for a social media prompt.
+
+The user is about to answer the following question in a post:
+"${question}"
+
+Write a short paragraph (2–4 sentences) that helps frame the topic in an engaging, emotional, and thoughtful way. Avoid technical jargon. The tone should be warm and professional.
+
+Respond with a plain string, no JSON, no formatting.
+`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.6,
+    });
+
+    return response.choices[0].message.content.trim();
+  } catch (err) {
+    console.error("QuickTake generation failed:", err.message);
+    return "People are rethinking how they design and communicate. The shift is from usability alone to emotional impact. Your thoughts on this topic can help inspire that shift.";
+  }
+};
+
+const getExpertQuote = async (question) => {
+  const prompt = `
+You are an AI that surfaces quotes from fictional or anonymized experts to inspire social media posts.
+
+Given this question: "${question}", create a short quote (1–2 sentences) from a made-up expert that sounds credible and reflective.
+
+Then give a name and title for that expert (e.g., Jessica Lin, Product Designer @ Figma).
+
+Respond in JSON format:
+{
+  "quote": "Your quote here",
+  "author": "Jessica Lin",
+  "title": "Product Designer @ Figma"
+}
+`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    return JSON.parse(response.choices[0].message.content.trim());
+  } catch (err) {
+    console.error("Expert quote generation failed:", err.message);
+    return {
+      quote: "This shift isn't about technology — it's about empathy and impact.",
+      author: "Jamie Rivera",
+      title: "Design Lead @ HumanWorks",
+    };
+  }
+};
+
+const generateFastFacts = async (question) => {
+  const prompt = `
+You are a helpful AI that surfaces bite-sized facts to support thoughtful social media posts.
+
+Given the topic: "${question}", provide 3 bullet points with surprising or insightful facts related to it.
+
+Make the facts emotionally resonant or inspiring, and include a relevant emoji at the start of each fact.
+
+Respond in JSON array format:
+[
+  "📊 Fact one",
+  "💡 Fact two",
+  "🧠 Fact three"
+]
+`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    return JSON.parse(response.choices[0].message.content.trim());
+  } catch (err) {
+    console.error("FastFacts generation failed:", err.message);
+    return [
+      "🧠 72% of users say emotional connection influences their loyalty — not just usability.",
+      "🏆 Companies like Airbnb and Apple embed emotional triggers in product design.",
+      "📉 UX metrics are evolving — time-on-task is no longer the only success signal."
+    ];
+  }
+};
+
+
+module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,
+   generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2, generateQuickTake , getExpertQuote, generateFastFacts};

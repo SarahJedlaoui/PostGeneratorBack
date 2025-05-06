@@ -231,4 +231,6 @@ router.post("/questionsV2", controller.generateQuestions2);
 
 router.put("/question", controller.updateQuestion);
 
+router.post("/insights", controller.generateInsights);
+
 module.exports = router;

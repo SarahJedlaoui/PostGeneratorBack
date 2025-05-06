@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const fs = require("fs");
 const { extractToneFromInput } = require("../services/openaiService");
-const { extractQuestionsFromTopic, generatePostFromSession, runFactCheck,extractQuestionsFromTopicV2 } = require("../services/openaiService");
+const { extractQuestionsFromTopic, generatePostFromSession, runFactCheck,extractQuestionsFromTopicV2,generateQuickTake,getExpertQuote, } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
   try {
@@ -119,9 +119,6 @@ exports.generateQuestions = async (req, res) => {
   res.status(200).json({ questions });
 };
 
-
-
-
 exports.getSession = async (req, res) => {
   const { sessionId } = req.params;
 
@@ -224,4 +221,32 @@ exports.generateQuestions2 = async (req, res) => {
   await session.save();
 
   res.status(200).json({ questions });
+};
+
+
+exports.generateInsights = async (req, res) => {
+  const { sessionId, question } = req.body;
+
+  if (!sessionId || !question) return res.status(400).json({ error: "Missing input" });
+
+  // ✅ Use OpenAI or similar service here
+  const quickTake = await generateQuickTake(question);
+  const expertQuote = await getExpertQuote(question);
+  const fastFacts = await generateFastFacts(question);
+
+  // Save in Mongo
+  await UserSession.findOneAndUpdate(
+    { sessionId },
+    {
+      $set: {
+        insights: {
+          quickTake,
+          expertQuote,
+          fastFacts,
+        },
+      },
+    }
+  );
+
+  res.json({ quickTake, expertQuote, fastFacts });
 };

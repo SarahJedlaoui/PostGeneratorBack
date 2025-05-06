@@ -11,6 +11,15 @@ const userSessionSchema = new mongoose.Schema({
   questions: [String], 
   answers: [String],
   generatedPost: { type: String },   
+  insights: {
+    quickTake: String,
+    expertQuote: {
+      quote: String,
+      author: String,
+      title: String
+    },
+    fastFacts: [String]
+  }
 });
 
 module.exports = mongoose.model("UserSession", userSessionSchema);
