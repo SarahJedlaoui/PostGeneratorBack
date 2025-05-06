@@ -7,6 +7,7 @@ const userSessionSchema = new mongoose.Schema({
   fileName: String,
   toneSummary: { type: Object },
   topic: String,
+  chosenQuestion: String,
   questions: [String], 
   answers: [String],
   generatedPost: { type: String },   

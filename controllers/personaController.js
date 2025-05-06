@@ -71,6 +71,34 @@ exports.updateTopic = async (req, res) => {
   }
 };
 
+exports.updateQuestion = async (req, res) => {
+  const { sessionId, question } = req.body;
+  console.log("question", question);
+
+  if (!sessionId || !question) {
+    return res
+      .status(400)
+      .json({ message: "sessionId and question are required" });
+  }
+
+  try {
+    const session = await UserSession.findOneAndUpdate(
+      { sessionId },
+      { chosenQuestion: question },
+      { new: true }
+    );
+
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    res.status(200).json({ message: "chosenQuestion saved", chosenQuestion });
+  } catch (err) {
+    console.error("Error saving topic:", err.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 exports.generateQuestions = async (req, res) => {
   const { sessionId } = req.body;
 

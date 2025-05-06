@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { personaChat } = require('../controllers/chatController');
+const { personaChat,handleConversation } = require('../controllers/chatController');
 
 
 /**
@@ -31,7 +31,7 @@ const { personaChat } = require('../controllers/chatController');
  *                 reply:
  *                   type: string
  */
-router.post('/chat', personaChat);
-
+router.post('/', personaChat);
+router.post("/chat", handleConversation);
 
 module.exports = router;

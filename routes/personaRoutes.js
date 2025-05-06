@@ -70,6 +70,8 @@ router.post("/", upload.single("file"), controller.createSession);
  */
 router.put("/topic", controller.updateTopic);
 
+
+
 /**
  * @swagger
  * /api/persona/questions:
@@ -220,5 +222,13 @@ router.post("/generate", controller.generatePost);
  *         description: Failed to run fact check
  */
 router.post("/fact-check", controller.factCheck);
+
+
+
+
+
+
+
+router.put("/question", controller.updateQuestion);
 
 module.exports = router;
