@@ -333,32 +333,38 @@ Respond in JSON format:
     };
   }
 };
+
 const generateFastFacts = async (question) => {
   const prompt = `
-You are a helpful assistant that gives concise, punchy fast facts to support a social media post.
-Give 3 short facts or stats that relate to this question:
-"${question}"
-
-Return them as a JSON array of strings like:
-[
-  "📊 85% of users engage with posts that start with a question.",
-  "💡 Visuals increase engagement by 67%.",
-  "🧠 LinkedIn posts with personal stories get 3x more responses."
-]
-`;
+  You are a helpful assistant that gives concise, punchy fast facts to support a social media post.
+  
+  Only return a valid JSON array (nothing else). Do NOT add explanations.
+  
+  Give exactly 3 short facts or stats (no more, no less) that relate to this question:
+  "${question}"
+  
+  The format must be:
+  [
+    "📊 85% of users engage with posts that start with a question.",
+    "💡 Visuals increase engagement by 67%.",
+    "🧠 LinkedIn posts with personal stories get 3x more responses."
+  ]
+  `;
+  
 
   try {
-    const res = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.6,
-    });
-
-    return JSON.parse(res.choices[0].message.content);
+    const raw = res.choices[0].message.content;
+    console.log("AI Raw Response:", raw);
+  
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) throw new Error("Not an array");
+  
+    return parsed;
   } catch (err) {
-    console.error("generateFastFacts failed:", err.message);
-    return ["Fast fact 1", "Fast fact 2", "Fast fact 3"];
+    console.error("generateFastFacts failed to parse:", err.message);
+    return ["📌 Fast Fact 1", "📌 Fast Fact 2", "📌 Fast Fact 3"];
   }
+  
 };
 
 
