@@ -10,6 +10,7 @@ const {
   extractQuestionsFromTopicV2,
   generateQuickTake,
   getExpertQuote,
+  generateFastFacts
 } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
