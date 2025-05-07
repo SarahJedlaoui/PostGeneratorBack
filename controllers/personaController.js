@@ -71,34 +71,6 @@ exports.updateTopic = async (req, res) => {
   }
 };
 
-exports.updateQuestion = async (req, res) => {
-  const { sessionId, question } = req.body;
-  console.log("question", question);
-
-  if (!sessionId || !question) {
-    return res
-      .status(400)
-      .json({ message: "sessionId and question are required" });
-  }
-
-  try {
-    const session = await UserSession.findOneAndUpdate(
-      { sessionId },
-      { chosenQuestion: question },
-      { new: true }
-    );
-
-    if (!session) {
-      return res.status(404).json({ message: "Session not found" });
-    }
-
-    res.status(200).json({ message: "chosenQuestion saved", chosenQuestion });
-  } catch (err) {
-    console.error("Error saving topic:", err.message);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 exports.generateQuestions = async (req, res) => {
   const { sessionId } = req.body;
 
@@ -223,34 +195,56 @@ exports.generateQuestions2 = async (req, res) => {
   res.status(200).json({ questions });
 };
 
+exports.updateQuestion = async (req, res) => {
+  const { sessionId, question } = req.body;
+
+  if (!sessionId || !question) {
+    return res.status(400).json({ message: "sessionId and question are required" });
+  }
+
+  try {
+    const session = await UserSession.findOne({ sessionId });
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    session.chosenQuestion = question;
+    await session.save();
+
+    res.status(200).json({ message: "chosenQuestion saved", chosenQuestion: question });
+  } catch (err) {
+    console.error("Error saving question:", err.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 exports.generateInsights = async (req, res) => {
   const { sessionId, question } = req.body;
 
   if (!sessionId || !question) return res.status(400).json({ error: "Missing input" });
 
-  // ✅ Use OpenAI or similar service here
-  const quickTake = await generateQuickTake(question);
-  const expertQuote = await getExpertQuote(question);
-  const fastFacts = await generateFastFacts(question);
+  try {
+    const quickTake = await generateQuickTake(question);
+    console.log("quickTake:", quickTake);
+    
+    const expertQuote = await getExpertQuote(question);
+    console.log("expertQuote:", expertQuote);
+    
+    const fastFacts = await generateFastFacts(question);
+    console.log("fastFacts:", fastFacts);
 
-  // Save in Mongo
-  await UserSession.findOneAndUpdate(
-    { sessionId },
-    {
-      $set: {
-        insights: {
-          quickTake,
-          expertQuote,
-          fastFacts,
-        },
-      },
-    }
-  );
+    const session = await UserSession.findOne({ sessionId });
+    if (!session) return res.status(404).json({ message: "Session not found" });
 
-  res.json({ quickTake, expertQuote, fastFacts });
+    session.insights = { quickTake, expertQuote, fastFacts };
+    await session.save();
+    console.log("Updated Session:", session);
+    res.json({ session });
+  } catch (err) {
+    console.error("Insight generation failed:", err.message);
+    res.status(500).json({ message: "Failed to generate insights" });
+  }
 };
-
 
 exports.getInsights = async (req, res) => {
   const { sessionId } = req.params;
@@ -259,7 +253,7 @@ exports.getInsights = async (req, res) => {
     const session = await UserSession.findOne({ sessionId });
     if (!session) return res.status(404).json({ message: "Session not found" });
 
-    res.json({session});
+    res.json(session.insights || {});
   } catch (err) {
     console.error("Failed to fetch session:", err.message);
     res.status(500).json({ message: "Internal server error" });
