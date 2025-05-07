@@ -10,7 +10,7 @@ const {
   extractQuestionsFromTopicV2,
   generateQuickTake,
   getExpertQuote,
-  generateFastFacts,
+  generateFastFacts
 } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
@@ -197,7 +197,8 @@ exports.generateQuestions2 = async (req, res) => {
 
   const questions = await extractQuestionsFromTopicV2(topic, question);
 
-  await UserSession.findOneAndUpdate({ sessionId }, { $set: { questions } });
+  session.questions = questions;
+  await session.save();
 
   res.status(200).json({ questions });
 };
@@ -277,7 +278,7 @@ exports.getInsights = async (req, res) => {
   try {
     const session = await UserSession.findOne({ sessionId });
     if (!session) return res.status(404).json({ message: "Session not found" });
-    console.log("session returned from get insights", session);
+    console.log('session returned from get insights',session)
     res.json(session);
   } catch (err) {
     console.error("Failed to fetch session:", err.message);
