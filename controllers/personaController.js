@@ -278,7 +278,7 @@ exports.getInsights = async (req, res) => {
     const session = await UserSession.findOne({ sessionId });
     if (!session) return res.status(404).json({ message: "Session not found" });
 
-    res.json(session.insights || {});
+    res.json(session);
   } catch (err) {
     console.error("Failed to fetch session:", err.message);
     res.status(500).json({ message: "Internal server error" });
