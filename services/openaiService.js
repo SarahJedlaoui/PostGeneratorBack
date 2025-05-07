@@ -333,40 +333,35 @@ Respond in JSON format:
     };
   }
 };
-
 const generateFastFacts = async (question) => {
   const prompt = `
-You are a helpful AI that surfaces bite-sized facts to support thoughtful social media posts.
+You are a helpful assistant that gives concise, punchy fast facts to support a social media post.
+Give 3 short facts or stats that relate to this question:
+"${question}"
 
-Given the topic: "${question}", provide 3 bullet points with surprising or insightful facts related to it.
-
-Make the facts emotionally resonant or inspiring, and include a relevant emoji at the start of each fact.
-
-Respond in JSON array format:
+Return them as a JSON array of strings like:
 [
-  "📊 Fact one",
-  "💡 Fact two",
-  "🧠 Fact three"
+  "📊 85% of users engage with posts that start with a question.",
+  "💡 Visuals increase engagement by 67%.",
+  "🧠 LinkedIn posts with personal stories get 3x more responses."
 ]
 `;
 
   try {
-    const response = await openai.chat.completions.create({
+    const res = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
+      temperature: 0.6,
     });
 
-    return JSON.parse(response.choices[0].message.content.trim());
+    return JSON.parse(res.choices[0].message.content);
   } catch (err) {
-    console.error("FastFacts generation failed:", err.message);
-    return [
-      "🧠 72% of users say emotional connection influences their loyalty — not just usability.",
-      "🏆 Companies like Airbnb and Apple embed emotional triggers in product design.",
-      "📉 UX metrics are evolving — time-on-task is no longer the only success signal."
-    ];
+    console.error("generateFastFacts failed:", err.message);
+    return ["Fast fact 1", "Fast fact 2", "Fast fact 3"];
   }
 };
+
+
 
 
 module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,

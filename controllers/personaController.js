@@ -3,7 +3,14 @@ const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const fs = require("fs");
 const { extractToneFromInput } = require("../services/openaiService");
-const { extractQuestionsFromTopic, generatePostFromSession, runFactCheck,extractQuestionsFromTopicV2,generateQuickTake,getExpertQuote, } = require("../services/openaiService");
+const {
+  extractQuestionsFromTopic,
+  generatePostFromSession,
+  runFactCheck,
+  extractQuestionsFromTopicV2,
+  generateQuickTake,
+  getExpertQuote,
+} = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
   try {
@@ -155,7 +162,9 @@ exports.factCheck = async (req, res) => {
   try {
     const session = await UserSession.findOne({ sessionId });
     if (!session || !session.generatedPost) {
-      return res.status(404).json({ message: "No post found for this session" });
+      return res
+        .status(404)
+        .json({ message: "No post found for this session" });
     }
 
     const { generatedPost } = session;
@@ -172,8 +181,6 @@ exports.factCheck = async (req, res) => {
   }
 };
 
-
-
 exports.generateQuestions2 = async (req, res) => {
   const { sessionId } = req.body;
 
@@ -187,7 +194,7 @@ exports.generateQuestions2 = async (req, res) => {
   if (!topic)
     return res.status(400).json({ message: "Session has no topic yet" });
 
-  const questions = await extractQuestionsFromTopicV2(topic,question);
+  const questions = await extractQuestionsFromTopicV2(topic, question);
 
   session.questions = questions;
   await session.save();
@@ -199,7 +206,9 @@ exports.updateQuestion = async (req, res) => {
   const { sessionId, question } = req.body;
 
   if (!sessionId || !question) {
-    return res.status(400).json({ message: "sessionId and question are required" });
+    return res
+      .status(400)
+      .json({ message: "sessionId and question are required" });
   }
 
   try {
@@ -211,7 +220,9 @@ exports.updateQuestion = async (req, res) => {
     session.chosenQuestion = question;
     await session.save();
 
-    res.status(200).json({ message: "chosenQuestion saved", chosenQuestion: question });
+    res
+      .status(200)
+      .json({ message: "chosenQuestion saved", chosenQuestion: question });
   } catch (err) {
     console.error("Error saving question:", err.message);
     res.status(500).json({ message: "Internal server error" });
@@ -221,17 +232,31 @@ exports.updateQuestion = async (req, res) => {
 exports.generateInsights = async (req, res) => {
   const { sessionId, question } = req.body;
 
-  if (!sessionId || !question) return res.status(400).json({ error: "Missing input" });
+  if (!sessionId || !question)
+    return res.status(400).json({ error: "Missing input" });
 
   try {
-    const quickTake = await generateQuickTake(question);
-    console.log("quickTake:", quickTake);
-    
-    const expertQuote = await getExpertQuote(question);
-    console.log("expertQuote:", expertQuote);
-    
-    const fastFacts = await generateFastFacts(question);
-    console.log("fastFacts:", fastFacts);
+    let quickTake = "",
+      expertQuote = {},
+      fastFacts = [];
+
+    try {
+      quickTake = await generateQuickTake(question);
+    } catch (e) {
+      console.error("quickTake failed", e.message);
+    }
+
+    try {
+      expertQuote = await getExpertQuote(question);
+    } catch (e) {
+      console.error("expertQuote failed", e.message);
+    }
+
+    try {
+      fastFacts = await generateFastFacts(question);
+    } catch (e) {
+      console.error("fastFacts failed", e.message);
+    }
 
     const session = await UserSession.findOne({ sessionId });
     if (!session) return res.status(404).json({ message: "Session not found" });
