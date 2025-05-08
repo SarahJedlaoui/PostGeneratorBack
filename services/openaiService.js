@@ -233,7 +233,7 @@ Post:
 };
 
 
-
+//prototype2
 
 const extractQuestionsFromTopicV2 = async (topic,question) => {
   const prompt = `
@@ -371,9 +371,51 @@ const generateFastFacts = async (question) => {
   }
 };
 
+//prototype3
 
+const getTrendingTopics = async () => {
+  const prompt = `
+You are an AI that helps identify trending social media discussion topics.
+
+Give 5 short and popular content topics that are currently trending on social media platforms like Instagram, LinkedIn, TikTok, and Twitter. These should be the kind of topics professionals, creators, and thought leaders are discussing in 2024.
+
+Return ONLY a JSON array of strings like:
+[
+  "AI in design",
+  "Remote work burnout",
+  "Instagram vs LinkedIn for creators",
+  "Sustainable tech habits",
+  "Rise of personal branding"
+]
+`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    const raw = completion.choices[0].message.content.trim();
+    const topics = JSON.parse(raw);
+
+    if (!Array.isArray(topics)) throw new Error("OpenAI did not return an array");
+
+    return topics;
+  } catch (err) {
+    console.error("❌ Failed to fetch trending topics from OpenAI:", err.message);
+    return [
+      "AI in design",
+      "Remote work burnout",
+      "Instagram vs LinkedIn for creators",
+      "Sustainable tech habits",
+      "Rise of personal branding"
+    ]; // fallback
+  }
+};
 
 
 
 module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,
-   generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2, generateQuickTake , getExpertQuote, generateFastFacts};
+   generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2, generateQuickTake , getExpertQuote, 
+   generateFastFacts, getTrendingTopics };

@@ -10,8 +10,11 @@ const {
   extractQuestionsFromTopicV2,
   generateQuickTake,
   getExpertQuote,
-  generateFastFacts
+  generateFastFacts,
+  getTrendingTopics,
+
 } = require("../services/openaiService");
+
 
 exports.createSession = async (req, res) => {
   try {
@@ -182,6 +185,8 @@ exports.factCheck = async (req, res) => {
   }
 };
 
+//prototype2
+
 exports.generateQuestions2 = async (req, res) => {
   const { sessionId } = req.body;
 
@@ -283,5 +288,28 @@ exports.getInsights = async (req, res) => {
   } catch (err) {
     console.error("Failed to fetch session:", err.message);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+//prototype3
+
+// /controllers/trendingController.js
+
+
+exports.getTrendingTopicsWithQuestions = async (req, res) => {
+  try {
+    const topics = await getTrendingTopics(); // Mocked or real API data
+    const result = [];
+
+    for (const topic of topics) {
+      const questions = await extractQuestionsFromTopicV2(topic);
+      result.push({ topic, questions });
+    }
+
+    res.status(200).json({ topics: result });
+  } catch (err) {
+    console.error("Error fetching trending topics:", err.message);
+    res.status(500).json({ message: "Failed to fetch trending topics" });
   }
 };

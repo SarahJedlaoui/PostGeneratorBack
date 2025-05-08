@@ -225,7 +225,7 @@ router.post("/fact-check", controller.factCheck);
 
 
 
-
+//prototype2
 
 router.post("/questionsV2", controller.generateQuestions2);
 
@@ -233,4 +233,11 @@ router.put("/question", controller.updateQuestion);
 
 router.post("/insights", controller.generateInsights);
 router.get("/insights/:sessionId", controller.getInsights);
+
+
+//prototype3
+
+router.get("/trending", controller.getTrendingTopicsWithQuestions);
+
+
 module.exports = router;
