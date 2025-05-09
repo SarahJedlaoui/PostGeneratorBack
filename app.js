@@ -9,7 +9,8 @@ app.use(cors({
     origin: [
       "*",  
       "http://localhost:3000",
-      "https://sophiaa-seven.vercel.app"
+      "https://sophiaa-seven.vercel.app",
+      "https://sophia-post.vercel.app"
     ],
     credentials: true
   }));
