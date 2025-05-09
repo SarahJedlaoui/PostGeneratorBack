@@ -150,13 +150,29 @@ exports.generatePost = async (req, res) => {
   if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
 
   try {
+    const session = await UserSession.findOne({ sessionId });
+
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    // ✅ If a post already exists, return it instead of generating
+    if (session.generatedPost && session.generatedPost.trim() !== "") {
+      return res.status(200).json({ post: session.generatedPost });
+    }
+
+    // Otherwise, generate a new one
     const post = await generatePostFromSession(sessionId);
+    session.generatedPost = post;
+    await session.save();
+
     res.status(200).json({ post });
   } catch (err) {
     console.error("Error generating post:", err);
     res.status(500).json({ message: err.message || "Error generating post" });
   }
 };
+
 
 exports.factCheck = async (req, res) => {
   const { sessionId } = req.body;
