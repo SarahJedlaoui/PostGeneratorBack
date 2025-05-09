@@ -201,7 +201,14 @@ Analyze the following social media post and return a JSON object like this:
       "url": "https://example.com"
     },
     ...
+  ],
+  "facts": [
+    {
+      "fact": "Short description",
+    },
+    ...
   ]
+
 }
 
 Post:
@@ -225,6 +232,7 @@ Post:
     return {
       highlights: parsed.highlights || [],
       sources: parsed.sources || [],
+      facts: parsed.facts || [],
     };
   } catch (err) {
     console.error("❌ Failed to parse AI response as JSON:", raw);

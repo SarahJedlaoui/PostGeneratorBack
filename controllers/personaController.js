@@ -158,7 +158,7 @@ exports.generatePost = async (req, res) => {
 
     // ✅ If a post already exists, return it instead of generating
     if (session.generatedPost && session.generatedPost.trim() !== "") {
-      return res.status(200).json({ post: session.generatedPost });
+      return res.status(200).json({ post: session.gener });
     }
 
     // Otherwise, generate a new one
@@ -181,24 +181,38 @@ exports.factCheck = async (req, res) => {
   try {
     const session = await UserSession.findOne({ sessionId });
     if (!session || !session.generatedPost) {
-      return res
-        .status(404)
-        .json({ message: "No post found for this session" });
+      return res.status(404).json({ message: "No post found for this session" });
     }
 
-    const { generatedPost } = session;
-    const { highlights, sources } = await runFactCheck(generatedPost);
+    // ✅ Return cached fact-check if exists
+    if (
+      session.factCheck &&
+      Array.isArray(session.factCheck.highlights) &&
+      session.factCheck.highlights.length > 0 &&
+      Array.isArray(session.factCheck.sources) &&
+      session.factCheck.sources.length > 0
+    ) {
+      return res.status(200).json({
+        highlights: session.factCheck.highlights,
+        sources: session.factCheck.sources,
+        facts: session.factCheck.facts || [],
+      });
+    }
 
-    return res.status(200).json({
-      post: generatedPost,
-      highlights,
-      sources,
-    });
+    // ✅ Run new fact-check
+    const { generatedPost } = session;
+    const { highlights, sources, facts } = await runFactCheck(generatedPost);
+
+    session.factCheck = { highlights, sources, facts };
+    await session.save();
+
+    return res.status(200).json({ highlights, sources, facts });
   } catch (err) {
     console.error("Fact-check error:", err.message);
     res.status(500).json({ message: "Failed to process fact-check" });
   }
 };
+
 
 //prototype2
 

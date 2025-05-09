@@ -8,9 +8,9 @@ const userSessionSchema = new mongoose.Schema({
   toneSummary: { type: Object },
   topic: String,
   chosenQuestion: String,
-  questions: [String], 
+  questions: [String],
   answers: [String],
-  generatedPost: { type: String },   
+  generatedPost: { type: String },
   insights: {
     quickTake: String,
     expertQuote: {
@@ -20,7 +20,13 @@ const userSessionSchema = new mongoose.Schema({
     },
     fastFacts: [String],
     keyIdeas: [String]
+  },
+  factCheck: {
+    highlights: [Object],
+    sources: [Object],
+    facts: [Object]
   }
 });
+
 
 module.exports = mongoose.model("UserSession", userSessionSchema);
