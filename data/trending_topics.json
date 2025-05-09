@@ -1,0 +1,95 @@
+{
+  "topics": [
+    {
+      "topic": "Metaverse Expansion",
+      "questions": [
+        "How will metaverse change our lives?",
+        "What are the potential risks of metaverse?",
+        "Can metaverse replace the physical world?",
+        "How will privacy be ensured in metaverse?"
+      ]
+    },
+    {
+      "topic": "AI Ethics",
+      "questions": [
+        "Who is responsible when AI goes wrong?",
+        "How can we ensure AI fairness?",
+        "Can AI decisions be transparent?",
+        "What regulations are needed for AI?"
+      ]
+    },
+    {
+      "topic": "Quantum Computing",
+      "questions": [
+        "How will quantum computing change our lives?",
+        "What are the challenges in quantum computing?",
+        "Can quantum computers crack all encryption?",
+        "How can we prepare for a quantum future?"
+      ]
+    },
+    {
+      "topic": "Cybersecurity Threats",
+      "questions": [
+        "How can we protect ourselves from cyber threats?",
+        "Are we prepared for a major cyberattack?",
+        "What is the role of AI in cybersecurity?",
+        "Can cybersecurity keep up with evolving threats?"
+      ]
+    },
+    {
+      "topic": "AI in Education",
+      "questions": [
+        "How is AI transforming education?",
+        "What are the risks of AI in education?",
+        "Can AI replace teachers?",
+        "How can AI personalize learning?"
+      ]
+    },
+    {
+      "topic": "Blockchain Technology",
+      "questions": [
+        "How is blockchain more than just cryptocurrencies?",
+        "What are the limitations of blockchain?",
+        "Can blockchain revolutionize supply chain management?",
+        "How secure is blockchain technology?"
+      ]
+    },
+    {
+      "topic": "Data Privacy",
+      "questions": [
+        "How can we ensure data privacy?",
+        "What are the consequences of data breaches?",
+        "Can we trust tech companies with our data?",
+        "How does AI affect data privacy?"
+      ]
+    },
+    {
+      "topic": "5G Technology",
+      "questions": [
+        "How will 5G technology affect our lives?",
+        "What are the health concerns related to 5G?",
+        "Can 5G technology revolutionize IoT?",
+        "How secure is 5G technology?"
+      ]
+    },
+    {
+      "topic": "Autonomous Vehicles",
+      "questions": [
+        "How safe are autonomous vehicles?",
+        "Can autonomous vehicles replace human drivers?",
+        "What are the ethical issues related to autonomous vehicles?",
+        "How will autonomous vehicles impact our lifestyle?"
+      ]
+    },
+    {
+      "topic": "Robotics in Daily Life",
+      "questions": [
+        "How are robots impacting our daily lives?",
+        "What are the risks of relying on robots?",
+        "Can robots replace human jobs?",
+        "How can we ensure ethical use of robotics?"
+      ]
+    }
+  ],
+  "updatedAt": "2025-05-08T20:15:48.255Z"
+}

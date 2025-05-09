@@ -414,8 +414,37 @@ Return ONLY a JSON array of strings like:
   }
 };
 
+const generateKeyIdeas = async (question) => {
+  const prompt = `
+You're an expert content strategist. Given this question:
+
+"${question}"
+
+Generate 3 short, clear learning objectives or key ideas someone might reflect on when answering this question.
+
+Respond in this JSON format:
+[
+  "First idea here",
+  "Second key idea",
+  "Third reflection point"
+]
+`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.6,
+    });
+    return JSON.parse(response.choices[0].message.content.trim());
+  } catch (err) {
+    console.error("Key idea generation failed:", err.message);
+    return ["Idea 1", "Idea 2", "Idea 3"];
+  }
+};
+
 
 
 module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,
    generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2, generateQuickTake , getExpertQuote, 
-   generateFastFacts, getTrendingTopics };
+   generateFastFacts, getTrendingTopics, generateKeyIdeas };

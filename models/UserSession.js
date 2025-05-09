@@ -18,7 +18,8 @@ const userSessionSchema = new mongoose.Schema({
       author: String,
       title: String
     },
-    fastFacts: [String]
+    fastFacts: [String],
+    keyIdeas: [String]
   }
 });
 

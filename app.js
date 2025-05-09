@@ -27,4 +27,5 @@ app.use('/api/market', require('./routes/marketRoutes'));
 app.use('/api/persona', require('./routes/personaRoutes'));
 app.use("/api/trending", require("./routes/trendingRoutes.js"));
 app.use("/api/question", require("./routes/chatRoutes.js"));
+app.use("/api/topics", require("./routes/trendingTopicRoutes.js"));
 module.exports = app;

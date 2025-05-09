@@ -1,6 +1,7 @@
 // controllers/trendingController.js
 const { getTrendingTitles } = require("../services/trendingService");
 
+
 /** POST /api/trending  – body { topic: "..." } */
 const postTrending = async (req, res, next) => {
   try {
@@ -18,5 +19,9 @@ const postTrending = async (req, res, next) => {
     next(err); // forward to your global error middleware
   }
 };
+
+
+
+
 
 module.exports = { postTrending };

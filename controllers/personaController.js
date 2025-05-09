@@ -12,9 +12,7 @@ const {
   getExpertQuote,
   generateFastFacts,
   getTrendingTopics,
-
 } = require("../services/openaiService");
-
 
 exports.createSession = async (req, res) => {
   try {
@@ -264,10 +262,16 @@ exports.generateInsights = async (req, res) => {
       console.error("fastFacts failed", e.message);
     }
 
+     try {
+      keyIdeas = await generateKeyIdeas(question);
+    } catch (e) {
+      console.error("keyIdeas failed", e.message);
+    }
+
     const session = await UserSession.findOne({ sessionId });
     if (!session) return res.status(404).json({ message: "Session not found" });
 
-    session.insights = { quickTake, expertQuote, fastFacts };
+    session.insights = { quickTake, expertQuote, fastFacts, keyIdeas };
     await session.save();
     console.log("Updated Session:", session);
     res.json({ session });
@@ -283,7 +287,7 @@ exports.getInsights = async (req, res) => {
   try {
     const session = await UserSession.findOne({ sessionId });
     if (!session) return res.status(404).json({ message: "Session not found" });
-    console.log('session returned from get insights',session)
+    console.log("session returned from get insights", session);
     res.json(session);
   } catch (err) {
     console.error("Failed to fetch session:", err.message);
@@ -291,11 +295,9 @@ exports.getInsights = async (req, res) => {
   }
 };
 
-
 //prototype3
 
 // /controllers/trendingController.js
-
 
 exports.getTrendingTopicsWithQuestions = async (req, res) => {
   try {
