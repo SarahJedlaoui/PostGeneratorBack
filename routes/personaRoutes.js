@@ -238,6 +238,6 @@ router.get("/insights/:sessionId", controller.getInsights);
 //prototype3
 
 router.get("/trending", controller.getTrendingTopicsWithQuestions);
-
+router.post("/edit-post", controller.editPost);
 
 module.exports = router;

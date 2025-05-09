@@ -12,7 +12,8 @@ const {
   getExpertQuote,
   generateFastFacts,
   getTrendingTopics,
-  generateKeyIdeas
+  generateKeyIdeas,
+  runPostEdit 
 } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
@@ -341,5 +342,28 @@ exports.getTrendingTopicsWithQuestions = async (req, res) => {
   } catch (err) {
     console.error("Error fetching trending topics:", err.message);
     res.status(500).json({ message: "Failed to fetch trending topics" });
+  }
+};
+
+exports.editPost = async (req, res) => {
+  const { sessionId, instruction } = req.body;
+  if (!sessionId || !instruction) {
+    return res.status(400).json({ message: "Missing sessionId or instruction" });
+  }
+
+  try {
+    const session = await UserSession.findOne({ sessionId });
+    if (!session || !session.generatedPost) {
+      return res.status(404).json({ message: "No post found to edit" });
+    }
+
+    const editedPost = await runPostEdit(session.generatedPost, instruction);
+    session.generatedPost = editedPost;
+    await session.save();
+
+    return res.status(200).json({ post: editedPost });
+  } catch (err) {
+    console.error("Error editing post:", err.message);
+    res.status(500).json({ message: "Failed to process edit request" });
   }
 };

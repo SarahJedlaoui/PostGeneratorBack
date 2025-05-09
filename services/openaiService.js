@@ -147,7 +147,7 @@ Your responsibilities:
 - Back up your post with facts or common knowledge.
 - Keep it helpful, trustworthy, and user-aligned.
 - End the post with a reflective question or engagement hook.
-- No hashtags unless absolutely essential.
+- Use hashtags.
 
 Output just the final crafted post.
   `;
@@ -451,8 +451,30 @@ Respond in this JSON format:
   }
 };
 
+const runPostEdit = async (originalPost, instruction) => {
+  const prompt = `
+You are a professional social media assistant helping users refine their content.
+
+Instruction: "${instruction}"
+
+Here is the original post:
+"""
+${originalPost}
+"""
+
+Return the revised post text only.
+`;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.7,
+  });
+
+  return completion.choices[0].message.content.trim();
+};
 
 
 module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,
    generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2, generateQuickTake , getExpertQuote, 
-   generateFastFacts, getTrendingTopics, generateKeyIdeas };
+   generateFastFacts, getTrendingTopics, generateKeyIdeas,runPostEdit };
