@@ -242,7 +242,8 @@ exports.generateInsights = async (req, res) => {
   try {
     let quickTake = "",
       expertQuote = {},
-      fastFacts = [];
+      fastFacts = [],
+      keyIdeas = [];
 
     try {
       quickTake = await generateQuickTake(question);
@@ -262,7 +263,7 @@ exports.generateInsights = async (req, res) => {
       console.error("fastFacts failed", e.message);
     }
 
-     try {
+    try {
       keyIdeas = await generateKeyIdeas(question);
     } catch (e) {
       console.error("keyIdeas failed", e.message);
