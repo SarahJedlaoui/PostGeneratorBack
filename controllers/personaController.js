@@ -12,6 +12,7 @@ const {
   getExpertQuote,
   generateFastFacts,
   getTrendingTopics,
+  generateKeyIdeas
 } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
@@ -274,7 +275,6 @@ exports.generateInsights = async (req, res) => {
 
     session.insights = { quickTake, expertQuote, fastFacts, keyIdeas };
     await session.save();
-    console.log("Updated Session:", session);
     res.json({ session });
   } catch (err) {
     console.error("Insight generation failed:", err.message);
