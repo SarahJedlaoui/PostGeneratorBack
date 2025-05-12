@@ -217,7 +217,8 @@ exports.factCheck = async (req, res) => {
 exports.generateQuestions2 = async (req, res) => {
   const { sessionId } = req.body;
 
-  if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
+  if (!sessionId)
+    return res.status(400).json({ message: "Missing sessionId" });
 
   const session = await UserSession.findOne({ sessionId });
   if (!session) return res.status(404).json({ message: "Session not found" });
@@ -228,12 +229,20 @@ exports.generateQuestions2 = async (req, res) => {
     return res.status(400).json({ message: "Session has no topic yet" });
 
   const questions = await extractQuestionsFromTopicV2(topic, question);
-
-  session.questions = questions;
-  await session.save();
+try {
+  await UserSession.findOneAndUpdate(
+    { sessionId },
+    { questions },
+    { new: true }
+  );
 
   res.status(200).json({ questions });
+  } catch (err) {
+  console.error("Error updating session:", err.stack || err.message);
+  res.status(500).json({ message: "Failed to update questions." });
+}
 };
+
 
 exports.updateQuestion = async (req, res) => {
   const { sessionId, question } = req.body;
