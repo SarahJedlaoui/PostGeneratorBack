@@ -1,5 +1,6 @@
 const OpenAI = require("openai");
 const UserSession = require("../models/UserSession");
+const { jsonrepair } = require("jsonrepair");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -228,7 +229,8 @@ Post:
   const raw = completion.choices[0].message.content.trim();
 
   try {
-    const parsed = JSON.parse(raw);
+    const repaired = jsonrepair(raw);
+    const parsed = JSON.parse(repaired);
     return {
       highlights: parsed.highlights || [],
       sources: parsed.sources || [],
