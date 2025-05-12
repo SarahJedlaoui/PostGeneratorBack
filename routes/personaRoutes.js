@@ -239,5 +239,7 @@ router.get("/insights/:sessionId", controller.getInsights);
 
 router.get("/trending", controller.getTrendingTopicsWithQuestions);
 router.post("/edit-post", controller.editPost);
+router.post("/drafts", controller.getPostDrafts);
+
 
 module.exports = router;

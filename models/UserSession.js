@@ -25,7 +25,12 @@ const userSessionSchema = new mongoose.Schema({
     highlights: [Object],
     sources: [Object],
     facts: [Object]
-  }
+  },
+  postDrafts: [{ 
+  content: String, 
+  editedAt: { type: Date, default: Date.now } 
+}]
+
 });
 
 

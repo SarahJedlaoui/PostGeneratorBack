@@ -368,8 +368,13 @@ exports.editPost = async (req, res) => {
     if (!session || !session.generatedPost) {
       return res.status(404).json({ message: "No post found to edit" });
     }
+    const previousPost = session.generatedPost;
+    const editedPost = await runPostEdit(previousPost, instruction);
 
-    const editedPost = await runPostEdit(session.generatedPost, instruction);
+    // Save old post as draft
+    session.postDrafts = session.postDrafts || [];
+    session.postDrafts.push({ content: previousPost });
+
     session.generatedPost = editedPost;
     await session.save();
 
@@ -378,4 +383,12 @@ exports.editPost = async (req, res) => {
     console.error("Error editing post:", err.message);
     res.status(500).json({ message: "Failed to process edit request" });
   }
+};
+
+exports.getPostDrafts = async (req, res) => {
+  const { sessionId } = req.body;
+  const session = await UserSession.findOne({ sessionId });
+  if (!session) return res.status(404).json({ message: "Session not found" });
+
+  res.json({ drafts: session.postDrafts || [] });
 };
