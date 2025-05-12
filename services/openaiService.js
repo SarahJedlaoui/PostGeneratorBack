@@ -205,12 +205,17 @@ Analyze the following social media post and return a JSON object like this:
   ],
   "facts": [
     {
-      "fact": "Short description",
+      "fact": "Concise, standalone factual statement found in or implied by the post."
     },
     ...
   ]
 
 }
+📌 A 'fact' is an objective, verifiable statement — for example:
+✅ "The global edtech market is projected to reach $404B by 2025."  
+✅ "AI can be used to create personalized learning experiences for students."
+
+Do not return opinions, summaries, or speculation in the 'facts' array. Stick to concise, sourced, factual claims.
 
 Post:
 """${postText}"""
