@@ -215,7 +215,7 @@ Post:
 """${postText}"""
 `;
 
-  const completion = await openai.chat.completions.create({
+  const completion = await openai.beta.chat.completions.create({
     model: "gpt-4",
     response_format: "json",
     messages: [
