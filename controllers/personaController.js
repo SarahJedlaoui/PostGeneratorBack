@@ -183,20 +183,7 @@ exports.factCheck = async (req, res) => {
         .json({ message: "No post found for this session" });
     }
 
-    // ✅ Return cached fact-check if exists
-    if (
-      session.factCheck &&
-      Array.isArray(session.factCheck.highlights) &&
-      session.factCheck.highlights.length > 0 &&
-      Array.isArray(session.factCheck.sources) &&
-      session.factCheck.sources.length > 0
-    ) {
-      return res.status(200).json({
-        highlights: session.factCheck.highlights,
-        sources: session.factCheck.sources,
-        facts: session.factCheck.facts || [],
-      });
-    }
+    
 
     // ✅ Run new fact-check
     const { generatedPost } = session;
@@ -387,6 +374,7 @@ exports.editPost = async (req, res) => {
 
 exports.getPostDrafts = async (req, res) => {
   const { sessionId } = req.body;
+   if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
   const session = await UserSession.findOne({ sessionId });
   if (!session) return res.status(404).json({ message: "Session not found" });
 
