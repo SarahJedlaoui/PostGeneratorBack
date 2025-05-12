@@ -262,52 +262,46 @@ exports.updateQuestion = async (req, res) => {
   }
 };
 
-exports.generateInsights = async (req, res) => {
-  const { sessionId, question } = req.body;
+exports.generateInsights = async (sessionId, question) => {
+  if (!sessionId || !question) {
+    throw new Error("Missing sessionId or question");
+  }
 
-  if (!sessionId || !question)
-    return res.status(400).json({ error: "Missing input" });
+  let quickTake = "", expertQuote = {}, fastFacts = [], keyIdeas = [];
 
   try {
-    let quickTake = "",
-      expertQuote = {},
-      fastFacts = [],
-      keyIdeas = [];
-
-    try {
-      quickTake = await generateQuickTake(question);
-    } catch (e) {
-      console.error("quickTake failed", e.message);
-    }
-
-    try {
-      expertQuote = await getExpertQuote(question);
-    } catch (e) {
-      console.error("expertQuote failed", e.message);
-    }
-
-    try {
-      fastFacts = await generateFastFacts(question);
-    } catch (e) {
-      console.error("fastFacts failed", e.message);
-    }
-
-    try {
-      keyIdeas = await generateKeyIdeas(question);
-    } catch (e) {
-      console.error("keyIdeas failed", e.message);
-    }
-
-    const session = await UserSession.findOne({ sessionId });
-    if (!session) return res.status(404).json({ message: "Session not found" });
-
-    session.insights = { quickTake, expertQuote, fastFacts, keyIdeas };
-    await session.save();
-    res.json({ session });
-  } catch (err) {
-    console.error("Insight generation failed:", err.message);
-    res.status(500).json({ message: "Failed to generate insights" });
+    quickTake = await generateQuickTake(question);
+  } catch (e) {
+    console.error("quickTake failed:", e.message);
   }
+
+  try {
+    expertQuote = await getExpertQuote(question);
+  } catch (e) {
+    console.error("expertQuote failed:", e.message);
+  }
+
+  try {
+    fastFacts = await generateFastFacts(question);
+  } catch (e) {
+    console.error("fastFacts failed:", e.message);
+  }
+
+  try {
+    keyIdeas = await generateKeyIdeas(question);
+  } catch (e) {
+    console.error("keyIdeas failed:", e.message);
+  }
+
+  const updated = await UserSession.findOneAndUpdate(
+    { sessionId },
+    { insights: { quickTake, expertQuote, fastFacts, keyIdeas } },
+    { new: true } // returns updated document
+  );
+
+  if (!updated) throw new Error("Session not found");
+
+  return updated;
 };
 
 exports.getInsights = async (req, res) => {
