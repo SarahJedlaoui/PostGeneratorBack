@@ -263,6 +263,7 @@ exports.updateQuestion = async (req, res) => {
 };
 
 exports.generateInsights = async (sessionId, question) => {
+  const { sessionId, question } = req.body;
   if (!sessionId || !question) {
     throw new Error("Missing sessionId or question");
   }
