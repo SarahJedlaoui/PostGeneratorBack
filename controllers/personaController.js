@@ -13,7 +13,7 @@ const {
   generateFastFacts,
   getTrendingTopics,
   generateKeyIdeas,
-  runPostEdit 
+  runPostEdit,
 } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
@@ -171,7 +171,6 @@ exports.generatePost = async (req, res) => {
   }
 };
 
-
 exports.factCheck = async (req, res) => {
   const { sessionId } = req.body;
   if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
@@ -179,7 +178,9 @@ exports.factCheck = async (req, res) => {
   try {
     const session = await UserSession.findOne({ sessionId });
     if (!session || !session.generatedPost) {
-      return res.status(404).json({ message: "No post found for this session" });
+      return res
+        .status(404)
+        .json({ message: "No post found for this session" });
     }
 
     // ✅ Return cached fact-check if exists
@@ -210,7 +211,6 @@ exports.factCheck = async (req, res) => {
     res.status(500).json({ message: "Failed to process fact-check" });
   }
 };
-
 
 //prototype2
 
@@ -262,13 +262,16 @@ exports.updateQuestion = async (req, res) => {
   }
 };
 
-exports.generateInsights = async (sessionId, question) => {
+exports.generateInsights = async (req, res) => {
   const { sessionId, question } = req.body;
   if (!sessionId || !question) {
     throw new Error("Missing sessionId or question");
   }
 
-  let quickTake = "", expertQuote = {}, fastFacts = [], keyIdeas = [];
+  let quickTake = "",
+    expertQuote = {},
+    fastFacts = [],
+    keyIdeas = [];
 
   try {
     quickTake = await generateQuickTake(question);
@@ -293,16 +296,19 @@ exports.generateInsights = async (sessionId, question) => {
   } catch (e) {
     console.error("keyIdeas failed:", e.message);
   }
+  try {
+    const updated = await UserSession.findOneAndUpdate(
+      { sessionId },
+      { insights: { quickTake, expertQuote, fastFacts, keyIdeas } },
+      { new: true } // returns updated document
+    );
 
-  const updated = await UserSession.findOneAndUpdate(
-    { sessionId },
-    { insights: { quickTake, expertQuote, fastFacts, keyIdeas } },
-    { new: true } // returns updated document
-  );
-
-  if (!updated) throw new Error("Session not found");
-
-  return updated;
+    if (!updated) throw new Error("Session not found");
+    res.json({ updated });
+  } catch (err) {
+    console.error("Insight generation failed:", err.message);
+    res.status(500).json({ message: "Failed to generate insights" });
+  }
 };
 
 exports.getInsights = async (req, res) => {
@@ -343,7 +349,9 @@ exports.getTrendingTopicsWithQuestions = async (req, res) => {
 exports.editPost = async (req, res) => {
   const { sessionId, instruction } = req.body;
   if (!sessionId || !instruction) {
-    return res.status(400).json({ message: "Missing sessionId or instruction" });
+    return res
+      .status(400)
+      .json({ message: "Missing sessionId or instruction" });
   }
 
   try {
