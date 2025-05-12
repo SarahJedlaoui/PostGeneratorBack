@@ -380,3 +380,24 @@ exports.getPostDrafts = async (req, res) => {
 
   res.json({ drafts: session.postDrafts || [] });
 };
+
+exports.getGeneratedPost = async (req, res) => {
+  const { sessionId } = req.body;
+
+  if (!sessionId) {
+    return res.status(400).json({ message: "Missing sessionId" });
+  }
+
+  try {
+    const session = await UserSession.findOne({ sessionId });
+
+    if (!session || !session.generatedPost) {
+      return res.status(404).json({ message: "No post found for this session" });
+    }
+
+    return res.status(200).json({ post: session.generatedPost });
+  } catch (err) {
+    console.error("Error retrieving generated post:", err.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
