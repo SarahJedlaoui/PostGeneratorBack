@@ -133,7 +133,7 @@ const generatePostFromSession = async (sessionId) => {
 
   const prompt = `
 You are an expert assistant that crafts high-quality social media posts for professionals.
-Your job is to write a short, authentic post (max 100 words) based on the topic and user input.
+Your job is to write a short, authentic post (max 100 words) based on the topic and user input powered by facts.
 
 Tone: ${tone}
 Style: ${style}
@@ -468,6 +468,12 @@ Here is the original post:
 """
 ${originalPost}
 """
+
+Your responsibilities:
+- Back up your post with facts or common knowledge.
+- Keep it helpful, trustworthy, and user-aligned.
+- End the post with a reflective question or engagement hook.
+- Use hashtags.
 
 Return the revised post text only.
 `;
