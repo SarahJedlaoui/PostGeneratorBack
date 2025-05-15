@@ -242,4 +242,13 @@ router.post("/edit-post", controller.editPost);
 router.post("/drafts", controller.getPostDrafts);
 router.post("/get-latest-post", controller.getGeneratedPost);
 
+//prototype3V2
+
+router.post("/deep-questions", controller.generateDeepQuestions);
+router.put("/followup", controller.storeFollowUpQuestion);
+router.post("/rate-post", controller.ratePost);
+router.put("/save-post", controller.saveEditedPost);
+router.post("/save-draft", controller.saveDraft);
+
+
 module.exports = router;

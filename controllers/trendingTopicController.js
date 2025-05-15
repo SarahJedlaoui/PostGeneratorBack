@@ -5,16 +5,6 @@ const {
   } = require("../services/trendingTopicService");
   
   
-  exports.refreshTrendingTopics = async (req, res) => {
-    try {
-      const topics = await trendingService.generateTrendingTopicsWithQuestions();
-      await trendingService.saveTrendingToFile(topics);
-      res.status(200).json({ message: "Topics refreshed", topics });
-    } catch (err) {
-      res.status(500).json({ message: "Error generating topics", error: err.message });
-    }
-  };
-  
 
   exports.refreshTrendingTopics = async (req, res) => {
     try {

@@ -1,0 +1,52 @@
+{
+    "domain": "travel-advisors",
+    "scraping": {
+        "hashtags": [
+            "traveladvisor",
+            "maldivestravel",
+            "honeymoondestinations",
+            "luxuryvacation"
+            
+            
+        ],
+        "platforms": {
+            "instagram": {
+                "enabled": true,
+                "maxPostsPerRun": 30,
+                "rateLimitMs": 2000
+            },
+            "tiktok": {
+                "enabled": true,
+                "maxPostsPerRun": 20,
+                "rateLimitMs": 2500
+            }
+        }
+    },
+    "feeds": {
+        "rss": [
+            "https://thepointsguy.com/rss",
+            "https://www.nomadicmatt.com/feed/",
+            "https://feeds.feedburner.com/luxurytravelblog",
+            "https://rss.nytimes.com/services/xml/rss/nyt/Travel.xml"
+        ],
+        "updateFrequency": "daily"
+    },
+    "nlp": {
+        "tone": "professional",
+        "keywordsToExclude": [
+            "sponsored",
+            "ad",
+            "contest"
+        ],
+        "minKeywordLength": 3
+    },
+    "prompt": {
+        "template": "Write 3 social media questions for travel advisors based on the topic '{{topic}}' that encourage sharing personal stories, tips, or strong opinions.",
+        "tone": "professional",
+        "hashtags": [
+            "#TravelAdvisor",
+            "#Wanderlust",
+            "#ExpertTips"
+        ]
+    }
+}

@@ -14,6 +14,8 @@ const {
   getTrendingTopics,
   generateKeyIdeas,
   runPostEdit,
+  generateFollowUpQuestions,
+  generatePostRatingFeedback
 } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
@@ -399,5 +401,125 @@ exports.getGeneratedPost = async (req, res) => {
   } catch (err) {
     console.error("Error retrieving generated post:", err.message);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+//prototypeV3V2 
+
+
+exports.generateDeepQuestions = async (req, res) => {
+  const { sessionId, previousAnswer } = req.body;
+
+  if (!sessionId || !previousAnswer) {
+    return res.status(400).json({ message: "Missing sessionId or answer" });
+  }
+
+  try {
+    const session = await UserSession.findOne({ sessionId });
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    const originalQuestion = session.chosenQuestion;
+
+    // Call OpenAI to generate 3 follow-up questions
+    const newQuestions = await generateFollowUpQuestions(originalQuestion, previousAnswer);
+
+    // Optionally store these questions if not already present
+    if (!session.questions || session.questions.length === 0) {
+      session.questions = [session.insights.followUpQuestion, ...newQuestions];
+      await session.save();
+    }
+
+    res.json(newQuestions);
+  } catch (err) {
+    console.error("generateDeepQuestions error:", err.message);
+    res.status(500).json({ message: "Failed to generate follow-up questions" });
+  }
+};
+
+exports.storeFollowUpQuestion = async (req, res) => {
+  const { sessionId, followUpQuestion } = req.body;
+
+  if (!sessionId || !followUpQuestion) {
+    return res.status(400).json({ message: "Missing data" });
+  }
+
+  try {
+    const updated = await UserSession.findOneAndUpdate(
+      { sessionId },
+      { $set: { questions: [followUpQuestion] } },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: "Session not found" });
+
+    res.json({ message: "Follow-up question stored", questions: updated.questions });
+  } catch (err) {
+    console.error("Failed to store follow-up question:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+exports.ratePost = async (req, res) => {
+  const { sessionId, post } = req.body;
+
+  if (!sessionId || !post) {
+    return res.status(400).json({ error: "Missing sessionId or post" });
+  }
+
+  try {
+    const feedback = await generatePostRatingFeedback(sessionId, post);
+    res.json({ feedback });
+  } catch (err) {
+    console.error("Error rating post:", err);
+    res.status(500).json({ error: "Failed to rate post" });
+  }
+};
+
+exports.saveEditedPost = async (req, res) => {
+  const { sessionId, post } = req.body;
+  if (!sessionId || !post) {
+    return res.status(400).json({ error: "Missing sessionId or post" });
+  }
+
+  try {
+    await UserSession.updateOne(
+      { sessionId },
+      { $set: { generatedPost: post } }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Failed to save post:", err);
+    res.status(500).json({ error: "Could not save post" });
+  }
+};
+
+exports.saveDraft = async (req, res) => {
+  const { sessionId, content } = req.body;
+
+  if (!sessionId || !content) {
+    return res.status(400).json({ error: "Missing sessionId or content" });
+  }
+
+  try {
+    await UserSession.updateOne(
+      { sessionId },
+      {
+        $push: {
+          postDrafts: {
+            content,
+            editedAt: new Date(),
+          },
+        },
+      }
+    );
+
+    res.json({ message: "Draft saved successfully." });
+  } catch (err) {
+    console.error("Error saving draft:", err);
+    res.status(500).json({ error: "Failed to save draft." });
   }
 };

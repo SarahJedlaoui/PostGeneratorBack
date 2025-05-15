@@ -488,6 +488,69 @@ Return the revised post text only.
 };
 
 
+//prototype3V2
+
+const generateFollowUpQuestions = async (originalQuestion, previousAnswer) => {
+  const prompt = `
+You are a helpful assistant helping people reflect on a topic.
+
+Here is the original question: "${originalQuestion}"
+Here is the user's previous answer: "${previousAnswer}"
+
+Generate 3 new reflective questions to help the user go deeper into their thoughts. Each question should be open-ended, personal, and not too technical.
+
+Respond with a JSON array like:
+[
+  "How did that experience shape your thinking?",
+  "What lesson did you take away from it?",
+  "How has your view evolved since then?"
+]
+`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    const content = response.choices[0].message.content;
+    const parsed = JSON.parse(content);
+
+    if (!Array.isArray(parsed) || parsed.length !== 3) throw new Error("Invalid format");
+    return parsed;
+  } catch (err) {
+    console.error("Failed to generate follow-up questions:", err.message);
+    return [
+      "What else do you remember about this?",
+      "How has this changed your perspective?",
+      "What would you do differently now?"
+    ];
+  }
+};
+
+const generatePostRatingFeedback = async (sessionId, post) => {
+  const prompt = `You're an expert social media coach. Analyze this post for clarity, engagement, and trustworthiness. Offer constructive feedback to improve it.\n\nPost:\n${post}\n\nYour feedback:`;
+
+  const completion = await openai.chat.completions.create({
+    messages: [
+      { role: "system", content: "You are a helpful, concise social media expert." },
+      { role: "user", content: prompt },
+    ],
+    model: "gpt-4",
+    max_tokens: 150,
+  });
+
+  const feedback = completion.choices[0]?.message?.content?.trim() || "";
+
+  await UserSession.updateOne(
+    { sessionId },
+    { $set: { "rating.feedback": feedback } }
+  );
+
+  return feedback;
+};
+
 module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,
    generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2, generateQuickTake , getExpertQuote, 
-   generateFastFacts, getTrendingTopics, generateKeyIdeas,runPostEdit };
+   generateFastFacts, getTrendingTopics, generateKeyIdeas,runPostEdit, generateFollowUpQuestions , generatePostRatingFeedback};

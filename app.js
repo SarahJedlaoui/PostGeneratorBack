@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const setupSwagger = require('./swagger');
+require("./utils/cron"); // Will start the scheduled task
 
 
 const app = express();
@@ -29,4 +30,11 @@ app.use('/api/persona', require('./routes/personaRoutes'));
 app.use("/api/trending", require("./routes/trendingRoutes.js"));
 app.use("/api/question", require("./routes/chatRoutes.js"));
 app.use("/api/topics", require("./routes/trendingTopicRoutes.js"));
+app.use("/api/rss", require("./routes/rssRoutes"));
+app.use("/api/instagram", require("./routes/instagramRoutes"));
+app.use("/api/topics", require("./routes/topicRoutes"));
+
+// version 3 
+
+app.use("/api/", require("./routes/topicRoutesV3"));
 module.exports = app;
