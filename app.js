@@ -37,4 +37,8 @@ app.use("/api/topics", require("./routes/topicRoutes"));
 // version 3 
 
 app.use("/api/", require("./routes/topicRoutesV3"));
+app.use("/api/auth", require("./routes/auth"));
+
+
+
 module.exports = app;

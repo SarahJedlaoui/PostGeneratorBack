@@ -40,7 +40,7 @@ const upload = multer({ dest: "./temp/" });
  *             sessionId:
  *               type: string
  */
-router.post("/", upload.single("file"), controller.createSession);
+router.post("/2222", upload.single("file"), controller.createSession);
 
 /**
  * @swagger
@@ -251,4 +251,5 @@ router.put("/save-post", controller.saveEditedPost);
 router.post("/save-draft", controller.saveDraft);
 
 
+router.post("/", controller.createSession2);
 module.exports = router;

@@ -15,7 +15,7 @@ const {
   generateKeyIdeas,
   runPostEdit,
   generateFollowUpQuestions,
-  generatePostRatingFeedback
+  generatePostRatingFeedback,
 } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
@@ -185,8 +185,6 @@ exports.factCheck = async (req, res) => {
         .json({ message: "No post found for this session" });
     }
 
-    
-
     // ✅ Run new fact-check
     const { generatedPost } = session;
     const { highlights, sources, facts } = await runFactCheck(generatedPost);
@@ -206,8 +204,7 @@ exports.factCheck = async (req, res) => {
 exports.generateQuestions2 = async (req, res) => {
   const { sessionId } = req.body;
 
-  if (!sessionId)
-    return res.status(400).json({ message: "Missing sessionId" });
+  if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
 
   const session = await UserSession.findOne({ sessionId });
   if (!session) return res.status(404).json({ message: "Session not found" });
@@ -218,20 +215,19 @@ exports.generateQuestions2 = async (req, res) => {
     return res.status(400).json({ message: "Session has no topic yet" });
 
   const questions = await extractQuestionsFromTopicV2(topic, question);
-try {
-  await UserSession.findOneAndUpdate(
-    { sessionId },
-    { questions },
-    { new: true }
-  );
+  try {
+    await UserSession.findOneAndUpdate(
+      { sessionId },
+      { questions },
+      { new: true }
+    );
 
-  res.status(200).json({ questions });
+    res.status(200).json({ questions });
   } catch (err) {
-  console.error("Error updating session:", err.stack || err.message);
-  res.status(500).json({ message: "Failed to update questions." });
-}
+    console.error("Error updating session:", err.stack || err.message);
+    res.status(500).json({ message: "Failed to update questions." });
+  }
 };
-
 
 exports.updateQuestion = async (req, res) => {
   const { sessionId, question } = req.body;
@@ -376,7 +372,7 @@ exports.editPost = async (req, res) => {
 
 exports.getPostDrafts = async (req, res) => {
   const { sessionId } = req.body;
-   if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
+  if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
   const session = await UserSession.findOne({ sessionId });
   if (!session) return res.status(404).json({ message: "Session not found" });
 
@@ -394,7 +390,9 @@ exports.getGeneratedPost = async (req, res) => {
     const session = await UserSession.findOne({ sessionId });
 
     if (!session || !session.generatedPost) {
-      return res.status(404).json({ message: "No post found for this session" });
+      return res
+        .status(404)
+        .json({ message: "No post found for this session" });
     }
 
     return res.status(200).json({ post: session.generatedPost });
@@ -404,9 +402,7 @@ exports.getGeneratedPost = async (req, res) => {
   }
 };
 
-
-//prototypeV3V2 
-
+//prototypeV3V2
 
 exports.generateDeepQuestions = async (req, res) => {
   const { sessionId, previousAnswer } = req.body;
@@ -424,7 +420,10 @@ exports.generateDeepQuestions = async (req, res) => {
     const originalQuestion = session.chosenQuestion;
 
     // Call OpenAI to generate 3 follow-up questions
-    const newQuestions = await generateFollowUpQuestions(originalQuestion, previousAnswer);
+    const newQuestions = await generateFollowUpQuestions(
+      originalQuestion,
+      previousAnswer
+    );
 
     // Optionally store these questions if not already present
     if (!session.questions || session.questions.length === 0) {
@@ -455,13 +454,15 @@ exports.storeFollowUpQuestion = async (req, res) => {
 
     if (!updated) return res.status(404).json({ message: "Session not found" });
 
-    res.json({ message: "Follow-up question stored", questions: updated.questions });
+    res.json({
+      message: "Follow-up question stored",
+      questions: updated.questions,
+    });
   } catch (err) {
     console.error("Failed to store follow-up question:", err.message);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 exports.ratePost = async (req, res) => {
   const { sessionId, post } = req.body;
@@ -521,5 +522,25 @@ exports.saveDraft = async (req, res) => {
   } catch (err) {
     console.error("Error saving draft:", err);
     res.status(500).json({ error: "Failed to save draft." });
+  }
+};
+
+exports.createSession2 = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
+    const sessionId = `${userId}-${Date.now()}`;
+  
+    const session = await UserSession.create({
+      sessionId,
+      user: userId,
+    });
+
+    res.status(201).json({ sessionId });
+  } catch (error) {
+    console.error("Error creating session:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
