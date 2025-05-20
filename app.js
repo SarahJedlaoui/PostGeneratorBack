@@ -39,6 +39,6 @@ app.use("/api/topics", require("./routes/topicRoutes"));
 app.use("/api/", require("./routes/topicRoutesV3"));
 app.use("/api/auth", require("./routes/auth"));
 
-
+app.use("/api/auth/linkedin", require("./routes/linkedin.js"));
 
 module.exports = app;
