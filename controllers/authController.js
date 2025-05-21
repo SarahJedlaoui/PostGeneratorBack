@@ -1,11 +1,11 @@
 const axios = require("axios");
-const User = require("../models/User");
+const User = require("../models/User"); // Your Mongoose model
 
 exports.linkedinCallback = async (req, res) => {
   const code = req.query.code;
 
   try {
-    // 1. Exchange code for access token
+    // Exchange code for access token
     const tokenRes = await axios.post("https://www.linkedin.com/oauth/v2/accessToken", null, {
       params: {
         grant_type: "authorization_code",
@@ -18,7 +18,7 @@ exports.linkedinCallback = async (req, res) => {
 
     const accessToken = tokenRes.data.access_token;
 
-    // 2. Fetch profile from OpenID Connect (basic data)
+    // Get profile info via OIDC
     const userInfoRes = await axios.get("https://api.linkedin.com/v2/userinfo", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -27,33 +27,17 @@ exports.linkedinCallback = async (req, res) => {
 
     const { sub: linkedinId, name, email, picture } = userInfoRes.data;
 
-    // 3. Fetch full LinkedIn profile (to get the person URN)
-    const meRes = await axios.get("https://api.linkedin.com/v2/me", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    const linkedinPersonURN = `urn:li:person:${meRes.data.id}`;
-
-    // 4. Save or update user in DB
+    // Upsert user
     const user = await User.findOneAndUpdate(
       { linkedinId },
-      {
-        linkedinId,
-        name,
-        email,
-        picture,
-        accessToken,
-        linkedinPersonURN, // required for posting later
-      },
+      { linkedinId, name, email, picture, accessToken },
       { upsert: true, new: true }
     );
 
-    // 5. Redirect to frontend with user._id
+    // ✅ Redirect to frontend with user ID or token
     return res.redirect(`${process.env.FRONTEND_URL}/topics?user=${user._id}`);
   } catch (err) {
-    console.error("LinkedIn OAuth error:", err?.response?.data || err.message);
+    console.error("LinkedIn OAuth error:", err.message);
     return res.status(500).send("OAuth failed");
   }
 };
