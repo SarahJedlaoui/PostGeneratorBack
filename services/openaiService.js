@@ -9,7 +9,7 @@ const openai = new OpenAI({
 const summarizeText = async (text) => {
   try {
     const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       messages: [{ role: "user", content: `Summarize this: ${text}` }],
     });
 
@@ -23,7 +23,7 @@ const summarizeText = async (text) => {
 const chatWithPersona = async (personaType, message) => {
   try {
     const chat = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -70,7 +70,7 @@ const extractToneFromInput = async (inputText) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.3,
     });
@@ -103,12 +103,17 @@ Respond with a JSON array like:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.5
     });
 
-    const content = response.choices[0].message.content;
+    let content = response.choices[0].message.content.trim();
+
+    // ✅ Strip markdown code wrapper if present
+    if (content.startsWith("```")) {
+      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    }
 
     return JSON.parse(content);
   } catch (err) {
@@ -121,6 +126,7 @@ Respond with a JSON array like:
     ];
   }
 };
+
 
 const generatePostFromSession = async (sessionId) => {
   const session = await UserSession.findOne({ sessionId });
@@ -151,10 +157,10 @@ Your responsibilities:
 - Use hashtags.
 
 Output just the final crafted post.
-  `;
+`;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",
@@ -170,13 +176,19 @@ Output just the final crafted post.
     temperature: 0.8
   });
 
-  const postText = completion.choices[0].message.content.trim();
+  let postText = completion.choices[0].message.content.trim();
+
+  // ✅ Strip markdown-style code block wrapper if present
+  if (postText.startsWith("```")) {
+    postText = postText.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+  }
 
   session.generatedPost = postText;
   await session.save();
 
   return postText;
 };
+
 
 const runFactCheck = async (postText) => {
   const prompt = `
@@ -192,25 +204,22 @@ Analyze the following social media post and return a JSON object like this:
         "title": "Source name",
         "url": "https://example.com"
       }
-    },
-    ...
+    }
   ],
   "sources": [
     {
       "title": "Source name",
       "snippet": "Short description",
       "url": "https://example.com"
-    },
-    ...
+    }
   ],
   "facts": [
     {
       "fact": "Concise, standalone factual statement found in or implied by the post."
-    },
-    ...
+    }
   ]
-
 }
+
 📌 A 'fact' is an objective, verifiable statement — for example:
 ✅ "The global edtech market is projected to reach $404B by 2025."  
 ✅ "AI can be used to create personalized learning experiences for students."
@@ -222,7 +231,7 @@ Post:
 `;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4",
+    model: "gpt-4o",
     messages: [
       { role: "system", content: "Return valid JSON only. Do not include markdown or code block formatting." },
       { role: "user", content: prompt }
@@ -231,7 +240,12 @@ Post:
     max_tokens: 500,
   });
 
-  const raw = completion.choices[0].message.content.trim();
+  let raw = completion.choices[0].message.content.trim();
+
+  // ✅ Strip markdown-style code block wrapper if present
+  if (raw.startsWith("```")) {
+    raw = raw.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+  }
 
   try {
     const repaired = jsonrepair(raw);
@@ -248,9 +262,10 @@ Post:
 };
 
 
+
 //prototype2
 
-const extractQuestionsFromTopicV2 = async (topic,question) => {
+const extractQuestionsFromTopicV2 = async (topic, question) => {
   const prompt = `
 You are a helpful AI assistant helping people write great, insightful social media posts.
 
@@ -270,12 +285,17 @@ Respond with a JSON array like:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.5
     });
 
-    const content = response.choices[0].message.content;
+    let content = response.choices[0].message.content.trim();
+
+    // Strip markdown-style code block if present
+    if (content.startsWith("```")) {
+      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    }
 
     return JSON.parse(content);
   } catch (err) {
@@ -288,6 +308,7 @@ Respond with a JSON array like:
     ];
   }
 };
+
 
 const generateQuickTake = async (question) => {
   const prompt = `
@@ -303,17 +324,25 @@ Respond with a plain string, no JSON, no formatting.
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.6,
     });
 
-    return response.choices[0].message.content.trim();
+    let content = response.choices[0].message.content.trim();
+
+    // Remove accidental markdown code block wrapping (e.g. ``` or ```text)
+    if (content.startsWith("```")) {
+      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    }
+
+    return content;
   } catch (err) {
     console.error("QuickTake generation failed:", err.message);
     return "People are rethinking how they design and communicate. The shift is from usability alone to emotional impact. Your thoughts on this topic can help inspire that shift.";
   }
 };
+
 
 const getExpertQuote = async (question) => {
   const prompt = `
@@ -333,12 +362,19 @@ Respond in JSON format:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
     });
 
-    return JSON.parse(response.choices[0].message.content.trim());
+    let content = response.choices[0].message.content.trim();
+
+    // Remove surrounding markdown block if present
+    if (content.startsWith("```")) {
+      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    }
+
+    return JSON.parse(content);
   } catch (err) {
     console.error("Expert quote generation failed:", err.message);
     return {
@@ -348,6 +384,7 @@ Respond in JSON format:
     };
   }
 };
+
 
 const generateFastFacts = async (question) => {
   const prompt = `
@@ -368,13 +405,18 @@ const generateFastFacts = async (question) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.6,
     });
 
-    const raw = completion.choices[0].message.content;
+    let raw = completion.choices[0].message.content.trim();
     console.log("AI Raw Response:", raw);
+
+    // Remove markdown-style code block if present
+    if (raw.startsWith("```")) {
+      raw = raw.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    }
 
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) throw new Error("Not an array");
@@ -385,6 +427,7 @@ const generateFastFacts = async (question) => {
     return ["📌 Fast Fact 1", "📌 Fast Fact 2", "📌 Fast Fact 3"];
   }
 };
+
 
 //prototype3
 
@@ -406,12 +449,18 @@ Return ONLY a JSON array of strings like:
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
     });
 
-    const raw = completion.choices[0].message.content.trim();
+    let raw = completion.choices[0].message.content.trim();
+
+    // Remove markdown-style code block if present
+    if (raw.startsWith("```")) {
+      raw = raw.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    }
+
     const topics = JSON.parse(raw);
 
     if (!Array.isArray(topics)) throw new Error("OpenAI did not return an array");
@@ -428,6 +477,7 @@ Return ONLY a JSON array of strings like:
     ]; // fallback
   }
 };
+
 
 const generateKeyIdeas = async (question) => {
   const prompt = `
@@ -447,16 +497,26 @@ Respond in this JSON format:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.6,
     });
-    return JSON.parse(response.choices[0].message.content.trim());
+
+    let content = response.choices[0].message.content.trim();
+
+    // Remove markdown-style code block if present
+    if (content.startsWith("```")) {
+      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    }
+
+    return JSON.parse(content);
   } catch (err) {
     console.error("Key idea generation failed:", err.message);
     return ["Idea 1", "Idea 2", "Idea 3"];
   }
 };
+
+
 
 const runPostEdit = async (originalPost, instruction) => {
   const prompt = `
@@ -479,13 +539,21 @@ Return the revised post text only.
 `;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4",
+    model: "gpt-4o",
     messages: [{ role: "user", content: prompt }],
     temperature: 0.7,
   });
 
-  return completion.choices[0].message.content.trim();
+  let content = completion.choices[0].message.content.trim();
+
+  // Remove markdown-style code block if present
+  if (content.startsWith("```")) {
+    content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+  }
+
+  return content;
 };
+
 
 
 //prototype3V2
@@ -509,15 +577,24 @@ Respond with a JSON array like:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
     });
 
-    const content = response.choices[0].message.content;
+    let content = response.choices[0].message.content.trim();
+
+    // Strip markdown formatting if present
+    if (content.startsWith("```")) {
+      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    }
+
     const parsed = JSON.parse(content);
 
-    if (!Array.isArray(parsed) || parsed.length !== 3) throw new Error("Invalid format");
+    if (!Array.isArray(parsed) || parsed.length !== 3) {
+      throw new Error("Invalid format");
+    }
+
     return parsed;
   } catch (err) {
     console.error("Failed to generate follow-up questions:", err.message);
@@ -529,6 +606,7 @@ Respond with a JSON array like:
   }
 };
 
+
 const generatePostRatingFeedback = async (sessionId, post) => {
   const prompt = `You're an expert social media coach. Analyze this post for clarity, engagement, and trustworthiness. Offer constructive feedback to improve it.\n\nPost:\n${post}\n\nYour feedback:`;
 
@@ -537,11 +615,16 @@ const generatePostRatingFeedback = async (sessionId, post) => {
       { role: "system", content: "You are a helpful, concise social media expert." },
       { role: "user", content: prompt },
     ],
-    model: "gpt-4",
+    model: "gpt-4o",
     max_tokens: 150,
   });
 
-  const feedback = completion.choices[0]?.message?.content?.trim() || "";
+  let feedback = completion.choices[0]?.message?.content?.trim() || "";
+
+  // Remove markdown-style code block if present
+  if (feedback.startsWith("```")) {
+    feedback = feedback.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+  }
 
   await UserSession.updateOne(
     { sessionId },
@@ -550,6 +633,7 @@ const generatePostRatingFeedback = async (sessionId, post) => {
 
   return feedback;
 };
+
 
 module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,
    generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2, generateQuickTake , getExpertQuote, 

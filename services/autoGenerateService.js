@@ -7,7 +7,8 @@ const {
   getExpertQuote,
   generateKeyIdeas,
   extractQuestionsFromTopicV2,
-} = require("./openaiService"); // adjust this import based on how you structured it
+} = require("./openaiService"); 
+// adjust this import based on how you structured it
 const Topic = require("../models/TopicV3");
 
 const autoGenerateAndStoreTopics = async () => {

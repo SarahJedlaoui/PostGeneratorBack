@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-
 const userSchema = new mongoose.Schema({
   linkedinId: { type: String },
   name: { type: String },
@@ -9,7 +8,9 @@ const userSchema = new mongoose.Schema({
   password: { type: String }, // optional if logged in via LinkedIn
   picture: { type: String },
   authType: { type: String, enum: ["email", "linkedin"], required: true },
-  accessToken:{ type: String },
+  accessToken: { type: String },
+  resetToken:  { type: String },
+  resetTokenExpiry: { type: String },
 });
 
 userSchema.pre("save", async function (next) {

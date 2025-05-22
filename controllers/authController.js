@@ -47,7 +47,7 @@ exports.linkedinCallback = async (req, res) => {
     });
 
     //  Redirect to frontend with user ID or token
-    return res.redirect(`${process.env.FRONTEND_URL}/topics?user=${user._id}&token=${jwtToken}`);
+    return res.redirect(`${process.env.FRONTEND_URL}/topics?userId=${user._id}&token=${jwtToken}`);
   } catch (err) {
     console.error("LinkedIn OAuth error:", err.message);
     return res.status(500).send("OAuth failed");

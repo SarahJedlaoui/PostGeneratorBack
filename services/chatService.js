@@ -17,7 +17,7 @@ async function continueConversation(sessionId, userMessage) {
 
   // Call OpenAI to get the AI’s next message (one follow-up question)
   const completion = await openai.chat.completions.create({
-    model: "gpt-4",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",

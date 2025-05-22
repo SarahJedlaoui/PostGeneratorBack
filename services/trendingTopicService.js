@@ -11,7 +11,7 @@ const openai = new OpenAI({
 const generateTrendingTopicsWithQuestions = async () => {
   const prompt = `
 You are a tech-savvy social media analyst.
-Find the 10 most trending topics right now in the tech and AI space based on what people are discussing on Instagram, LinkedIn, TikTok, and news headlines.
+Find the 10 most trending topics right now in the world in the tech and AI space based on what people are discussing on Instagram, LinkedIn, TikTok, and news headlines.
 
 For each topic, write:
 1. A short 4-word-or-less title.
@@ -30,18 +30,22 @@ Format your response as JSON like this:
   },
   ...
 ]
-Only return the JSON.
+Only return the JSON. Do not wrap it in markdown or backticks.
 `;
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.5,
       max_tokens: 1000,
     });
 
     const raw = response.choices[0].message.content.trim();
+     // Remove surrounding triple backticks and optional "json" label
+    if (raw.startsWith("```")) {
+      raw = raw.replace(/```json\s*|```/g, "").trim();
+    }
     const parsed = JSON.parse(raw);
     return parsed;
   } catch (err) {
