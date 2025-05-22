@@ -354,16 +354,16 @@ exports.editPost = async (req, res) => {
       return res.status(404).json({ message: "No post found to edit" });
     }
     const previousPost = session.generatedPost;
-    const editedPost = await runPostEdit(previousPost, instruction);
+    const { post, changes } = await runPostEdit(previousPost, instruction);
 
     // Save old post as draft
     session.postDrafts = session.postDrafts || [];
     session.postDrafts.push({ content: previousPost });
 
-    session.generatedPost = editedPost;
+    session.generatedPost = post;
     await session.save();
 
-    return res.status(200).json({ post: editedPost });
+    return res.status(200).json({ post, changes });
   } catch (err) {
     console.error("Error editing post:", err.message);
     res.status(500).json({ message: "Failed to process edit request" });

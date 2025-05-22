@@ -534,7 +534,11 @@ Your responsibilities:
 - End the post with a reflective question or engagement hook.
 - Use hashtags.
 
-Return the revised post text only.
+Return your response as a JSON object like this:
+{
+  "post": "your revised post here",
+  "changes": "summary of the modifications"
+}
 `;
 
   const completion = await openai.chat.completions.create({
@@ -549,8 +553,19 @@ Return the revised post text only.
   if (content.startsWith("```")) {
     content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
   }
-
-  return content;
+ try {
+    const parsed = JSON.parse(content);
+    return {
+      post: parsed.post || originalPost,
+      changes: parsed.changes || "No changes summarized.",
+    };
+  } catch (err) {
+    console.error("Failed to parse JSON from OpenAI:", content);
+    return {
+      post: originalPost,
+      changes: "No changes due to a formatting error.",
+    };
+  }
 };
 
 
