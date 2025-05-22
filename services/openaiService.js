@@ -317,7 +317,7 @@ You are a helpful AI assistant that provides short, insightful context for a soc
 The user is about to answer the following question in a post:
 "${question}"
 
-Write 2–3 concise sentences that emotionally frame the topic in an engaging and thoughtful way. Keep it short, human, and warm — no fluff, no technical jargon. The tone is professional and friendly.
+Write 1-2 concise sentences that emotionally frame the topic in an engaging and thoughtful way. Keep it short, human, and warm — no fluff, no technical jargon. The tone is professional and friendly.
 Respond with a plain string, no JSON, no formatting.
 `;
 
