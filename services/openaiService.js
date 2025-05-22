@@ -607,15 +607,18 @@ Respond with a JSON array like:
 
 
 const generatePostRatingFeedback = async (sessionId, post) => {
-  const prompt = `You're an expert social media coach. Analyze this post for clarity, engagement, and trustworthiness. Offer constructive feedback to improve it.\n\nPost:\n${post}\n\nYour feedback:`;
+  const prompt = `You're a social media expert. Analyze this post and give only 2–3 sentences of clear, helpful feedback to improve clarity, engagement, and trust.\n\nPost:\n${post}\n\nBe specific and concise.`;
 
   const completion = await openai.chat.completions.create({
     messages: [
-      { role: "system", content: "You are a helpful, concise social media expert." },
+      {
+        role: "system",
+        content: "You are a helpful and concise social media coach. Your feedback must be short and actionable (2–3 sentences max).",
+      },
       { role: "user", content: prompt },
     ],
     model: "gpt-4o",
-    max_tokens: 150,
+    max_tokens: 120,
   });
 
   let feedback = completion.choices[0]?.message?.content?.trim() || "";
@@ -632,6 +635,7 @@ const generatePostRatingFeedback = async (sessionId, post) => {
 
   return feedback;
 };
+
 
 
 module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,
