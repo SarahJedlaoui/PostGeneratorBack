@@ -21,32 +21,9 @@ const {
 exports.createSession = async (req, res) => {
   try {
     const sessionId = uuidv4();
-    const styleNotes = req.body?.styleNotes || "";
-    console.log("styleNotes:", styleNotes);
-
-    let fileName = null;
-    console.log("file:", req.file);
-
-    if (req.file) {
-      const ext = path.extname(req.file.originalname);
-      fileName = `${sessionId}${ext}`;
-      fs.renameSync(req.file.path, `./temp/${fileName}`);
-    }
-
-    const toneRaw = await extractToneFromInput(styleNotes || fileName);
-
-    // Try to parse it if it's in JSON format
-    let toneSummary;
-    try {
-      toneSummary = JSON.parse(toneRaw);
-    } catch (err) {
-      toneSummary = { summary: toneRaw }; // fallback if it's plain text
-    }
+   
     const session = await UserSession.create({
       sessionId,
-      styleNotes,
-      fileName,
-      toneSummary,
     });
 
     res.status(201).json({ sessionId });
