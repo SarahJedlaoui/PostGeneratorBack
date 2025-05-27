@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 exports.linkedinCallback = async (req, res) => {
   const code = req.query.code;
-
+  const state = req.query.state;
   try {
     // Exchange code for access token
     const tokenRes = await axios.post(
@@ -46,8 +46,15 @@ exports.linkedinCallback = async (req, res) => {
       expiresIn: "7d",
     });
 
+
+    // Construct redirect URL
+    const base = state || "/topics"; // state is your returnTo
+    const separator = base.includes("?") ? "&" : "?";
+    const redirectUrl = `${process.env.FRONTEND_URL}${base}${separator}userId=${user._id}&token=${jwtToken}`;
+
+
     //  Redirect to frontend with user ID or token
-    return res.redirect(`${process.env.FRONTEND_URL}/topics?userId=${user._id}&token=${jwtToken}`);
+      return res.redirect(redirectUrl);
   } catch (err) {
     console.error("LinkedIn OAuth error:", err.message);
     return res.status(500).send("OAuth failed");
