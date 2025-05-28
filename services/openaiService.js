@@ -656,16 +656,25 @@ const generatePostRatingFeedback = async (sessionId, post) => {
 const createPostImage = async (post) => {
   const prompt = `
 Generate an image that visually complements this social media post without being too complex or abstract.
-Make it clean, modern, and suitable for professional use. 
+Make it clean, modern, and suitable for professional use.
 
 Post: "${post}"
 `;
 
-   const result = await openai.images.generate({
-      model: "gpt-image-1",
+  try {
+    const result = await openai.images.generate({
+      model: "dall-e-3",
       prompt,
+      n: 1,
+      size: "1024x1024",
+      response_format: "b64_json", 
     });
-  return result.data[0].b64_json;
+
+    return result.data[0].b64_json;
+  } catch (error) {
+    console.error("Image generation error:", error);
+    throw new Error("Failed to generate image.");
+  }
 };
 
 module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,
