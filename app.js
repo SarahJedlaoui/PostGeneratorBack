@@ -6,15 +6,27 @@ require("./utils/cron"); // Will start the scheduled task
 
 
 const app = express();
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://sophiaa-seven.vercel.app",
+  "https://sophia-post.vercel.app"
+];
+
 app.use(cors({
-    origin: [
-      "*",  
-      "http://localhost:3000",
-      "https://sophiaa-seven.vercel.app",
-      "https://sophia-post.vercel.app"
-    ],
-    credentials: true
-  }));
+  origin: function (origin, callback) {
+    // Allow requests with no origin (e.g. mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
   
 
 // ✅ Enable parsing of form fields for multipart/form-data
