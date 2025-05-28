@@ -46,15 +46,13 @@ exports.linkedinCallback = async (req, res) => {
       expiresIn: "7d",
     });
 
-
     // Construct redirect URL
     const base = state || "/topics"; // state is your returnTo
     const separator = base.includes("?") ? "&" : "?";
     const redirectUrl = `${process.env.FRONTEND_URL}${base}${separator}userId=${user._id}&token=${jwtToken}`;
 
-
     //  Redirect to frontend with user ID or token
-      return res.redirect(redirectUrl);
+    return res.redirect(redirectUrl);
   } catch (err) {
     console.error("LinkedIn OAuth error:", err.message);
     return res.status(500).send("OAuth failed");

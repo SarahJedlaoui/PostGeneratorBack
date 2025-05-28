@@ -252,4 +252,8 @@ router.post("/save-draft", controller.saveDraft);
 
 
 router.post("/", controller.createSession2);
+
+router.post("/generate-image", controller.generateImage);
+
+
 module.exports = router;

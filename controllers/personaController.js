@@ -16,6 +16,7 @@ const {
   runPostEdit,
   generateFollowUpQuestions,
   generatePostRatingFeedback,
+  createPostImage
 } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
@@ -519,5 +520,22 @@ exports.createSession2 = async (req, res) => {
   } catch (error) {
     console.error("Error creating session:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+exports.generateImage = async (req, res) => {
+  const { post } = req.body;
+
+  if (!post) {
+    return res.status(400).json({ error: "Post text is required" });
+  }
+
+  try {
+    const imageBase64 = await createPostImage(post);
+    res.json({ image: imageBase64 });
+  } catch (err) {
+    console.error("Error in controller:", err.message);
+    res.status(500).json({ error: "Image generation failed" });
   }
 };
