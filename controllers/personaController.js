@@ -533,9 +533,9 @@ exports.generateImage = async (req, res) => {
 
   try {
     const imageBase64 = await createPostImage(post);
-    res.json({ image: imageBase64 });
+   res.status(200).json({ image: imageBase64 });
   } catch (err) {
-    console.error("Error in controller:", err.message);
-    res.status(500).json({ error: "Image generation failed" });
+   console.error("Image generation error:", err);
+    res.status(500).json({ error: "Failed to generate image" });
   }
 };

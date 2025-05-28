@@ -661,12 +661,10 @@ Make it clean, modern, and suitable for professional use.
 Post: "${post}"
 `;
 
-  const result = await openai.images.generate({
-    model: "gpt-image-1",
-    prompt,
-    response_format: "b64_json",
-  });
-
+   const result = await openai.images.generate({
+      model: "gpt-image-1",
+      prompt,
+    });
   return result.data[0].b64_json;
 };
 
