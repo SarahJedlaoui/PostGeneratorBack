@@ -677,6 +677,39 @@ Post: "${post}"
   }
 };
 
+
+
+const extractInsightsFromPost = async (post) => {
+  const prompt = `
+You are a copywriter for social media helping users stand out with scroll-stopping content.
+
+Your task is to:
+1. Create a short, powerful hook that *captures the essence of the post*, but is **not copied directly**. It should feel like a bold tweet or a punchy quote. It must spark curiosity or provoke thought.
+2. Then, write **two original supporting statements** that paraphrase or creatively summarize ideas from the post. Do not just rephrase; aim to **distill and elevate** the message in a human, relatable way.
+
+Respond in **pure JSON** format, no markdown or explanation:
+{
+  "hook": "Your engaging hook here (max 12 words)",
+  "statements": [
+    "Creative statement 1",
+    "Creative statement 2"
+  ]
+}
+
+Post:
+"""${post}"""
+`;
+
+  const res = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.8 // More creative
+  });
+
+  return JSON.parse(res.choices[0].message.content);
+};
+
+
 module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,
    generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2, generateQuickTake , getExpertQuote, 
-   generateFastFacts, getTrendingTopics, generateKeyIdeas,runPostEdit, generateFollowUpQuestions , generatePostRatingFeedback , createPostImage};
+   generateFastFacts, getTrendingTopics, generateKeyIdeas,runPostEdit, generateFollowUpQuestions , generatePostRatingFeedback , createPostImage, extractInsightsFromPost};

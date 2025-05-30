@@ -6,27 +6,15 @@ require("./utils/cron"); // Will start the scheduled task
 
 
 const app = express();
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://sophiaa-seven.vercel.app",
-  "https://sophia-post.vercel.app"
-];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (e.g. mobile apps or curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
-
+    origin: [
+      "*",  
+      "http://localhost:3000",
+      "https://sophiaa-seven.vercel.app",
+      "https://sophia-post.vercel.app"
+    ],
+    credentials: true
+  }));
   
 
 // ✅ Enable parsing of form fields for multipart/form-data
@@ -52,5 +40,7 @@ app.use("/api/", require("./routes/topicRoutesV3"));
 app.use("/api/auth", require("./routes/auth"));
 
 app.use("/api/auth/linkedin", require("./routes/linkedin.js"));
+
+app.use("/api/images", require("./routes/imageRoutes"));
 
 module.exports = app;
