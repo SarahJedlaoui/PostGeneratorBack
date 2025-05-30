@@ -169,7 +169,7 @@ exports.factCheck = async (req, res) => {
 
     session.factCheck = { highlights, sources, facts };
     await session.save();
-
+     console.log("✅ /fact-check route hit");
     return res.status(200).json({ highlights, sources, facts });
   } catch (err) {
     console.error("Fact-check error:", err.message);
