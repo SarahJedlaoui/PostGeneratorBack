@@ -76,7 +76,6 @@ const extractToneFromInput = async (inputText) => {
     });
 
     return completion.choices[0].message.content;
-  
   } catch (error) {
     console.error("Error analyzing tone with OpenAI:", error.message);
     return "Could not analyze tone.";
@@ -105,14 +104,17 @@ Respond with a JSON array like:
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.5
+      temperature: 0.5,
     });
 
     let content = response.choices[0].message.content.trim();
 
     // ✅ Strip markdown code wrapper if present
     if (content.startsWith("```")) {
-      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+      content = content
+        .replace(/^```[a-z]*\n?/, "")
+        .replace(/```$/, "")
+        .trim();
     }
 
     return JSON.parse(content);
@@ -122,11 +124,10 @@ Respond with a JSON array like:
       "What inspired you to talk about this topic?",
       "What’s one thing people misunderstand about it?",
       "How do you personally relate to this topic?",
-      "What experience shaped your views on it?"
+      "What experience shaped your views on it?",
     ];
   }
 };
-
 
 const generatePostFromSession = async (sessionId) => {
   const session = await UserSession.findOne({ sessionId });
@@ -165,22 +166,25 @@ Output just the final crafted post.
       {
         role: "system",
         content:
-          "You write social media posts that sound natural, insightful, and accurate. You verify user input before writing."
+          "You write social media posts that sound natural, insightful, and accurate. You verify user input before writing.",
       },
       {
         role: "user",
-        content: prompt
-      }
+        content: prompt,
+      },
     ],
     max_tokens: 300,
-    temperature: 0.8
+    temperature: 0.8,
   });
 
   let postText = completion.choices[0].message.content.trim();
 
   // ✅ Strip markdown-style code block wrapper if present
   if (postText.startsWith("```")) {
-    postText = postText.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    postText = postText
+      .replace(/^```[a-z]*\n?/, "")
+      .replace(/```$/, "")
+      .trim();
   }
 
   session.generatedPost = postText;
@@ -188,7 +192,6 @@ Output just the final crafted post.
 
   return postText;
 };
-
 
 const runFactCheck = async (postText) => {
   const prompt = `
@@ -233,8 +236,12 @@ Post:
   const completion = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: [
-      { role: "system", content: "Return valid JSON only. Do not include markdown or code block formatting." },
-      { role: "user", content: prompt }
+      {
+        role: "system",
+        content:
+          "Return valid JSON only. Do not include markdown or code block formatting.",
+      },
+      { role: "user", content: prompt },
     ],
     temperature: 0.5,
     max_tokens: 500,
@@ -244,7 +251,10 @@ Post:
 
   // ✅ Strip markdown-style code block wrapper if present
   if (raw.startsWith("```")) {
-    raw = raw.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    raw = raw
+      .replace(/^```[a-z]*\n?/, "")
+      .replace(/```$/, "")
+      .trim();
   }
 
   try {
@@ -260,8 +270,6 @@ Post:
     throw new Error("AI response was not valid JSON.");
   }
 };
-
-
 
 //prototype2
 
@@ -287,14 +295,17 @@ Respond with a JSON array like:
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.5
+      temperature: 0.5,
     });
 
     let content = response.choices[0].message.content.trim();
 
     // Strip markdown-style code block if present
     if (content.startsWith("```")) {
-      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+      content = content
+        .replace(/^```[a-z]*\n?/, "")
+        .replace(/```$/, "")
+        .trim();
     }
 
     return JSON.parse(content);
@@ -304,11 +315,10 @@ Respond with a JSON array like:
       "What inspired you to talk about this topic?",
       "What’s one thing people misunderstand about it?",
       "How do you personally relate to this topic?",
-      "What experience shaped your views on it?"
+      "What experience shaped your views on it?",
     ];
   }
 };
-
 
 const generateQuickTake = async (question) => {
   const prompt = `
@@ -332,7 +342,10 @@ Respond with a plain string, no JSON, no formatting.
 
     // Remove accidental markdown code block wrapping (e.g. ``` or ```text)
     if (content.startsWith("```")) {
-      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+      content = content
+        .replace(/^```[a-z]*\n?/, "")
+        .replace(/```$/, "")
+        .trim();
     }
 
     return content;
@@ -341,7 +354,6 @@ Respond with a plain string, no JSON, no formatting.
     return "People are rethinking how they design and communicate. The shift is from usability alone to emotional impact. Your thoughts on this topic can help inspire that shift.";
   }
 };
-
 
 const getExpertQuote = async (question) => {
   const prompt = `
@@ -370,20 +382,23 @@ Respond in JSON format:
 
     // Remove surrounding markdown block if present
     if (content.startsWith("```")) {
-      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+      content = content
+        .replace(/^```[a-z]*\n?/, "")
+        .replace(/```$/, "")
+        .trim();
     }
 
     return JSON.parse(content);
   } catch (err) {
     console.error("Expert quote generation failed:", err.message);
     return {
-      quote: "This shift isn't about technology — it's about empathy and impact.",
+      quote:
+        "This shift isn't about technology — it's about empathy and impact.",
       author: "Jamie Rivera",
       title: "Design Lead @ HumanWorks",
     };
   }
 };
-
 
 const generateFastFacts = async (question) => {
   const prompt = `
@@ -414,7 +429,10 @@ const generateFastFacts = async (question) => {
 
     // Remove markdown-style code block if present
     if (raw.startsWith("```")) {
-      raw = raw.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+      raw = raw
+        .replace(/^```[a-z]*\n?/, "")
+        .replace(/```$/, "")
+        .trim();
     }
 
     const parsed = JSON.parse(raw);
@@ -426,7 +444,6 @@ const generateFastFacts = async (question) => {
     return ["📌 Fast Fact 1", "📌 Fast Fact 2", "📌 Fast Fact 3"];
   }
 };
-
 
 //prototype3
 
@@ -457,26 +474,32 @@ Return ONLY a JSON array of strings like:
 
     // Remove markdown-style code block if present
     if (raw.startsWith("```")) {
-      raw = raw.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+      raw = raw
+        .replace(/^```[a-z]*\n?/, "")
+        .replace(/```$/, "")
+        .trim();
     }
 
     const topics = JSON.parse(raw);
 
-    if (!Array.isArray(topics)) throw new Error("OpenAI did not return an array");
+    if (!Array.isArray(topics))
+      throw new Error("OpenAI did not return an array");
 
     return topics;
   } catch (err) {
-    console.error("❌ Failed to fetch trending topics from OpenAI:", err.message);
+    console.error(
+      "❌ Failed to fetch trending topics from OpenAI:",
+      err.message
+    );
     return [
       "AI in design",
       "Remote work burnout",
       "Instagram vs LinkedIn for creators",
       "Sustainable tech habits",
-      "Rise of personal branding"
+      "Rise of personal branding",
     ]; // fallback
   }
 };
-
 
 const generateKeyIdeas = async (question) => {
   const prompt = `
@@ -505,7 +528,10 @@ Respond in this JSON format:
 
     // Remove markdown-style code block if present
     if (content.startsWith("```")) {
-      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+      content = content
+        .replace(/^```[a-z]*\n?/, "")
+        .replace(/```$/, "")
+        .trim();
     }
 
     return JSON.parse(content);
@@ -514,8 +540,6 @@ Respond in this JSON format:
     return ["Idea 1", "Idea 2", "Idea 3"];
   }
 };
-
-
 
 const runPostEdit = async (originalPost, instruction) => {
   const prompt = `
@@ -551,9 +575,12 @@ Return your response as a JSON object like this:
 
   // Remove markdown-style code block if present
   if (content.startsWith("```")) {
-    content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    content = content
+      .replace(/^```[a-z]*\n?/, "")
+      .replace(/```$/, "")
+      .trim();
   }
- try {
+  try {
     const parsed = JSON.parse(content);
     return {
       post: parsed.post || originalPost,
@@ -567,8 +594,6 @@ Return your response as a JSON object like this:
     };
   }
 };
-
-
 
 //prototype3V2
 
@@ -600,7 +625,10 @@ Respond with a JSON array like:
 
     // Strip markdown formatting if present
     if (content.startsWith("```")) {
-      content = content.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+      content = content
+        .replace(/^```[a-z]*\n?/, "")
+        .replace(/```$/, "")
+        .trim();
     }
 
     const parsed = JSON.parse(content);
@@ -615,11 +643,10 @@ Respond with a JSON array like:
     return [
       "What else do you remember about this?",
       "How has this changed your perspective?",
-      "What would you do differently now?"
+      "What would you do differently now?",
     ];
   }
 };
-
 
 const generatePostRatingFeedback = async (sessionId, post) => {
   const prompt = `You're a social media expert. Analyze this post and give only 2–3 sentences of clear, helpful feedback to improve clarity, engagement, and trust.\n\nPost:\n${post}\n\nBe specific and concise.`;
@@ -628,7 +655,8 @@ const generatePostRatingFeedback = async (sessionId, post) => {
     messages: [
       {
         role: "system",
-        content: "You are a helpful and concise social media coach. Your feedback must be short and actionable (2–3 sentences max).",
+        content:
+          "You are a helpful and concise social media coach. Your feedback must be short and actionable (2–3 sentences max).",
       },
       { role: "user", content: prompt },
     ],
@@ -640,7 +668,10 @@ const generatePostRatingFeedback = async (sessionId, post) => {
 
   // Remove markdown-style code block if present
   if (feedback.startsWith("```")) {
-    feedback = feedback.replace(/^```[a-z]*\n?/, "").replace(/```$/, "").trim();
+    feedback = feedback
+      .replace(/^```[a-z]*\n?/, "")
+      .replace(/```$/, "")
+      .trim();
   }
 
   await UserSession.updateOne(
@@ -650,8 +681,6 @@ const generatePostRatingFeedback = async (sessionId, post) => {
 
   return feedback;
 };
-
-
 
 const createPostImage = async (post) => {
   const prompt = `
@@ -667,7 +696,7 @@ Post: "${post}"
       prompt,
       n: 1,
       size: "1024x1024",
-      response_format: "b64_json", 
+      response_format: "b64_json",
     });
 
     return result.data[0].b64_json;
@@ -676,8 +705,6 @@ Post: "${post}"
     throw new Error("Failed to generate image.");
   }
 };
-
-
 
 const extractInsightsFromPost = async (post) => {
   const prompt = `
@@ -703,13 +730,56 @@ Post:
   const res = await openai.chat.completions.create({
     model: "gpt-4",
     messages: [{ role: "user", content: prompt }],
-    temperature: 0.8 // More creative
+    temperature: 0.8, // More creative
   });
 
   return JSON.parse(res.choices[0].message.content);
 };
 
+const extractTopicAndQuestionFromText = async (text) => {
+  const prompt = `
+  You're an assistant that extracts a relevant topic and questions from a user's input.
+From the following text input, extract:
+1. A topic (what the post is about)
+2. A specific question or angle the user might explore
+3. A reflective question the user could answer
 
-module.exports = { summarizeText, chatWithPersona, extractToneFromInput , extractQuestionsFromTopic,
-   generatePostFromSession, runFactCheck, extractQuestionsFromTopicV2, generateQuickTake , getExpertQuote, 
-   generateFastFacts, getTrendingTopics, generateKeyIdeas,runPostEdit, generateFollowUpQuestions , generatePostRatingFeedback , createPostImage, extractInsightsFromPost};
+Respond in JSON:
+{
+  "topic": "short topic title",
+  "question": "specific question",
+  "reflective": "reflective question user can answer"
+}
+
+Text: """${text}"""
+`;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.6,
+  });
+
+  return JSON.parse(response.choices[0].message.content);
+};
+
+module.exports = {
+  summarizeText,
+  chatWithPersona,
+  extractToneFromInput,
+  extractQuestionsFromTopic,
+  generatePostFromSession,
+  runFactCheck,
+  extractQuestionsFromTopicV2,
+  generateQuickTake,
+  getExpertQuote,
+  generateFastFacts,
+  getTrendingTopics,
+  generateKeyIdeas,
+  runPostEdit,
+  generateFollowUpQuestions,
+  generatePostRatingFeedback,
+  createPostImage,
+  extractInsightsFromPost,
+  extractTopicAndQuestionFromText,
+};

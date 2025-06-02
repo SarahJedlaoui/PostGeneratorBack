@@ -16,7 +16,8 @@ const {
   runPostEdit,
   generateFollowUpQuestions,
   generatePostRatingFeedback,
-  createPostImage
+  createPostImage,
+  extractTopicAndQuestionFromText
 } = require("../services/openaiService");
 
 exports.createSession = async (req, res) => {
@@ -537,5 +538,34 @@ exports.generateImage = async (req, res) => {
   } catch (err) {
    console.error("Image generation error:", err);
     res.status(500).json({ error: "Failed to generate image" });
+  }
+};
+
+
+// choose own topic 
+
+exports.extractTopicAndQuestion = async (req, res) => {
+  const { sessionId, text } = req.body;
+  if (!sessionId || !text) {
+    return res.status(400).json({ message: "Missing sessionId or text" });
+  }
+
+  try {
+    const { topic, question, reflective } = await extractTopicAndQuestionFromText(text);
+
+    const session = await UserSession.findOne({ sessionId });
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    session.topic = topic;
+    session.chosenQuestion = question;
+    session.questions = [reflective];
+    await session.save();
+
+    return res.status(200).json({ topic, question, reflective });
+  } catch (err) {
+    console.error("Controller error:", err.message);
+    return res.status(500).json({ message: "Failed to extract topic and question" });
   }
 };

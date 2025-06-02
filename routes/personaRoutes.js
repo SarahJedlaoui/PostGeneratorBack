@@ -221,8 +221,12 @@ router.post("/generate", controller.generatePost);
  *       500:
  *         description: Failed to run fact check
  */
-router.post("/fact-check", controller.factCheck);
+//router.post("/fact-check", controller.factCheck);
 
+router.post("/fact-check", (req, res) => {
+  console.log("✅ /fact-check route was hit!");
+  res.status(200).json({ message: "route is working" });
+});
 
 
 //prototype2
@@ -250,10 +254,11 @@ router.post("/rate-post", controller.ratePost);
 router.put("/save-post", controller.saveEditedPost);
 router.post("/save-draft", controller.saveDraft);
 
-
 router.post("/", controller.createSession2);
 
 router.post("/generate-image", controller.generateImage);
 
+// generate personalized topic
+router.post("/extract-topic-question", controller.extractTopicAndQuestion);
 
 module.exports = router;

@@ -10,22 +10,22 @@ const openai = new OpenAI({
 
 const generateTrendingTopicsWithQuestions = async () => {
   const prompt = `
-You are a tech-savvy social media analyst.
-Find the 10 most trending topics right now in the world in the tech and AI space based on what people are discussing on Instagram, LinkedIn, TikTok, and news headlines.
+You are a tech-savvy social media analyst working with medical professionals.
+Find the 10 most trending medical and health-tech topics being discussed right now on platforms like Instagram, LinkedIn, TikTok, and news outlets.
 
-For each topic, write:
+For each topic, provide:
 1. A short 4-word-or-less title.
-2. 4 simple, reflective or opinion-based questions about the topic.
+2. 4 simple, reflective or opinion-based questions that a doctor might ask or respond to on social media.
 
-Format your response as JSON like this:
+Format your response as a JSON array like:
 [
   {
-    "topic": "AI in Healthcare",
+    "topic": "AI in Diagnostics",
     "questions": [
-      "How is AI helping doctors?",
-      "What are the risks involved?",
-      "Can AI replace radiologists?",
-      "Do patients trust machines?"
+      "How do you feel about AI diagnosing patients?",
+      "Has AI changed your workflow?",
+      "Do you trust machine predictions?",
+      "What cases worked well with AI?"
     ]
   },
   ...
