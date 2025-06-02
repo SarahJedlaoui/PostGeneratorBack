@@ -153,6 +153,9 @@ exports.generatePost = async (req, res) => {
 };
 
 exports.factCheck = async (req, res) => {
+  //  Set CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "https://sophia-post.vercel.app");
+  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   const { sessionId } = req.body;
   if (!sessionId) return res.status(400).json({ message: "Missing sessionId" });
 

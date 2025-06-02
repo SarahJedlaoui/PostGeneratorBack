@@ -221,12 +221,9 @@ router.post("/generate", controller.generatePost);
  *       500:
  *         description: Failed to run fact check
  */
-//router.post("/fact-check", controller.factCheck);
+router.post("/fact-check", controller.factCheck);
 
-router.post("/fact-check", (req, res) => {
-  console.log("✅ /fact-check route was hit!");
-  res.status(200).json({ message: "route is working" });
-});
+
 
 
 //prototype2
