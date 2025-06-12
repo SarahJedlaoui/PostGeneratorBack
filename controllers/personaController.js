@@ -572,3 +572,26 @@ exports.extractTopicAndQuestion = async (req, res) => {
     return res.status(500).json({ message: "Failed to extract topic and question" });
   }
 };
+
+
+//fetch all posts 
+
+
+exports.getSavedPosts = async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).json({ message: "Missing userId" });
+  }
+
+  try {
+    const posts = await UserSession.find({
+      user: userId,
+      generatedPost: { $exists: true, $ne: "" },
+    }).sort({ createdAt: -1 }); // Optional: sort by newest
+
+    return res.status(200).json({ posts });
+  } catch (err) {
+    console.error("Error fetching saved posts:", err.message);
+    return res.status(500).json({ message: "Failed to fetch saved posts" });
+  }
+};

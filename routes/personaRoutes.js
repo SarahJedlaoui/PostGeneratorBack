@@ -258,4 +258,10 @@ router.post("/generate-image", controller.generateImage);
 // generate personalized topic
 router.post("/extract-topic-question", controller.extractTopicAndQuestion);
 
+
+
+// fetch all posts :
+
+router.post("/saved-posts", controller.getSavedPosts);
+
 module.exports = router;
